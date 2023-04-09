@@ -1,0 +1,14 @@
+numpy
+pandas
+torch >=1.9
+torchaudio >=0.10,<1.0
+tqdm
+more-itertools
+transformers>=4.19.0
+ffmpeg-python==0.2.0
+pyannote.audio
+openai-whisper
+fairseq
+pytube
+moviepy
+requests_html
