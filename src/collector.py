@@ -61,8 +61,8 @@ class CleanSpeechDetector:
 
             seg_waveform = waveform[start:end]
 
-            mos_score = self.sqa_manager.estimate_score(seg_waveform)
             sc_results = self.sc_manager.pred_topk_with_label(seg_waveform, topk=topk)
+            mos_score = self.sqa_manager.estimate_score(seg_waveform)
 
             results["index"].append(idx)
             results["start"].append(start_t)

@@ -13,6 +13,8 @@ from torchaudio.prototype.pipelines import SQUIM_OBJECTIVE, SQUIM_SUBJECTIVE
 
 import pdb
 
+DAPS_N_CLEAN_WAV_NUM = 100
+
 def set_seeds(seed=777, multi_gpu=False):
     random.seed(seed)
     np.random.seed(seed)
@@ -100,7 +102,7 @@ def run_squim_objective(root_wav_dir, result_csv_dir, device, wav_sr=16000, use_
     
     print(">>Done SQUIM OBJECTIVE ESTIMATION.")
 
-def run_squim_subjective(root_wav_dir, result_csv_dir, nrm_wav_arr, device, wav_sr=16000, use_round=True):
+def run_squim_subjective(root_wav_dir, result_csv_dir, nmr_wav_arr, device, wav_sr=16000, use_round=True):
 
     device = torch.device("cuda")
 
@@ -118,7 +120,7 @@ def run_squim_subjective(root_wav_dir, result_csv_dir, nrm_wav_arr, device, wav_
 
         waveform, sr = torchaudio.load(wav_path)
         waveform = waveform.to(device)
-        nrm_waveform = torch.FloatTensor(nrm_wav_arr).to(device)
+        nmr_waveform = torch.FloatTensor(nmr_wav_arr).to(device)
 
         mos_score_list = []
         for seg_start_t, seg_end_t in zip(df['start'], df['end']):
@@ -129,7 +131,7 @@ def run_squim_subjective(root_wav_dir, result_csv_dir, nrm_wav_arr, device, wav_
             seg_waveform = waveform[:,seg_start:seg_end]
             
             n_test_frames = seg_waveform.shape[1]
-            chunk_size = nrm_waveform.shape[1]
+            chunk_size = nmr_waveform.shape[1]
             step_size = (chunk_size * 0.5)
 
             current_id = 0
@@ -142,9 +144,9 @@ def run_squim_subjective(root_wav_dir, result_csv_dir, nrm_wav_arr, device, wav_
 
                 print(start, end, duration)
                 chunk_test_waveform = seg_waveform[:, start:end]
-                chunk_test_waveform = chunk_test_waveform.repeat(nrm_wav_arr.shape[0], 1)
+                chunk_test_waveform = chunk_test_waveform.repeat(nmr_wav_arr.shape[0], 1)
 
-                chunk_nmr_waveform = nrm_waveform[:,:duration]
+                chunk_nmr_waveform = nmr_waveform[:,:duration]
                 with torch.no_grad():
                     print(chunk_test_waveform.shape, chunk_nmr_waveform.shape)
                     score = model(chunk_test_waveform, chunk_nmr_waveform)
@@ -169,34 +171,39 @@ if __name__ == '__main__':
     result_csv_dir = '/mnt/labelmaker/labelmaker/exps/csd/csv'
     wav_sr = 16000
     use_round = True
-    max_nrm_wav_time = 3
+    max_nmr_wav_time = 3.0
     device = torch.device("cuda")
     
     set_seeds()
 
     nmr_dir = '/mnt/dataset/daps'
-    nmr_wav_npy = os.path.join(nmr_dir, 'clean_nrm_n100_{}s.npy'.format(max_nrm_wav_time))
+    nmr_wav_npy = os.path.join(nmr_dir, 'clean_nmr_n100_{}ms.npy'.format(max_nmr_wav_time*1000))
     if not os.path.exists(nmr_wav_npy):
+
         print(">>Prepare nmr waveforms")
-        wav_nmr_list = [wav_path for wav_path in sorted(glob.glob(nmr_dir+"/daps/clean/*.wav"))
+        nmr_wav_list = sorted(glob.glob(nmr_dir+"/daps/clean/*.wav"))
+        nmr_wav_list = [wav_path for wav_path in nmr_wav_list
             if not wav_path.startswith('.')]
         
-        assert(len(wav_nmr_list) == 100), "Error not match NMR wav file number: {} : 100".foramt(len(wav_nmr_list))
+        assert(len(nmr_wav_list) == DAPS_N_CLEAN_WAV_NUM), "Error not match NMR wav file number: {} : 100".foramt(len(wav_nmr_list))
         
-        nrm_wav_arr = []
-        for wav_nmr_path in wav_nmr_list:
-            nrm_waveform = load_audio(wav_nmr_path, sr=wav_sr, chunk_time=max_nrm_wav_time)
-            # nrm_waveform shape: (wav_sr*max_nrm_wav_time,)
-            nrm_wav_arr.append(nrm_waveform)
-        nrm_wav_arr = np.stack(nrm_wav_arr)
-        np.save(nmr_wav_npy, nrm_wav_arr)
+        nmr_wav_arr = []
+        for nmr_wav_path in wav_nmr_list:
+
+            nmr_waveform = load_audio(nmr_wav_path, sr=wav_sr, chunk_time=max_nmr_wav_time)
+            # nmr_waveform shape: (wav_sr*max_nmr_wav_time,)
+            nmr_wav_arr.append(nmr_waveform)
+
+        nmr_wav_arr = np.stack(nmr_wav_arr)
+
+        np.save(nmr_wav_npy, nmr_wav_arr)
     else:
         print(">>Load prepared clean nmr waveforms")
-        nrm_wav_arr = np.load(nmr_wav_npy)
+        nmr_wav_arr = np.load(nmr_wav_npy)
 
     run_squim_objective(root_wav_dir, result_csv_dir, device, wav_sr=wav_sr, use_round=use_round)
 
-    run_squim_subjective(root_wav_dir, result_csv_dir, nrm_wav_arr, device, wav_sr=wav_sr, use_round=use_round)
+    run_squim_subjective(root_wav_dir, result_csv_dir, nmr_wav_arr, device, wav_sr=wav_sr, use_round=use_round)
     
 
         

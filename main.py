@@ -159,8 +159,6 @@ def main():
         assert(len(se_wav_list) == len(wav_list)),\
             "Not Match Speech Enhancement Wav File Number ({} != {})".format(len(se_wav_list), len(wav_list))
     
-    return
-
     # run Speech Quality Assessment with Sound Classification
     df_list = {}
     for (wav_path, dir_name) in tqdm.tqdm(zip(wav_list, dir_list)):

@@ -1,6 +1,6 @@
 import os
-import pdb
 import json
+import math
 import pandas as pd
 import numpy as np
 
@@ -74,7 +74,7 @@ class SoundClassifier:
             child_dict[cur_id] = (cur_child_ids, cur_name)
         return child_dict
 
-    def predict(self, waveform, mask=None):
+    def predict(self, waveform, mask=None, chunk_time=1.0, step_ratio=0.1, return_all=False):
         """
         Parameters
         ----------
@@ -82,17 +82,48 @@ class SoundClassifier:
             Input Raw Waveform.
         mask: torch.BoolTensor (n_samples,)
             Input Mask
+        chunk_time: float
+            Chunk time
+        step_ratio: float
+            Step ratio
         Returns
         ----------
         preds : torch.FloatTensor (n_classes,)
             posterior of sound classification.
         """
+        
+        chunk_size = int(chunk_time * self.sr)
+        step_size = chunk_size * step_ratio
 
         waveform = waveform.to(self.device).unsqueeze(0)
-        with torch.no_grad():
-            preds = self.model.extract_features(waveform, padding_mask=mask)[0]
-            preds = preds.squeeze(0).detach().cpu()
-        return preds
+        n_test_frames = waveform.shape[1]
+
+        pred_list = []
+        n_chunk = max(1, int(math.ceil((n_test_frames-chunk_size+step_size)/step_size)))
+        for chunk_id in range(n_chunk):
+            
+            start = int(step_size * chunk_id)
+            end = min(start + chunk_size, n_test_frames)
+            duration = int(end-start)
+
+            chunk_waveform = waveform[:,start:end]
+
+            chunk_mask = None
+            if mask is not None:
+                chunk_mask = mask[start:end]
+
+            with torch.no_grad():
+                pred = self.model.extract_features(chunk_waveform, padding_mask=chunk_mask)[0]
+                pred = pred.squeeze(0).detach().cpu()
+            pred_list.append(pred)
+
+        preds = torch.stack(pred_list)
+        pred = preds.mean(0)
+
+        if return_all:
+            return pred, preds
+        else:
+            return pred
 
     def pred_topk_with_label(self, waveform, mask=None, topk=5):
         pred = self.predict(waveform, mask=mask)

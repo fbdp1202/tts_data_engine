@@ -42,7 +42,7 @@ class SpeechDetector:
         self.binarize = Binarize(pad_onset=self.pad_onset, pad_offset=self.pad_offset)
 
     def run_segmentation(self, input_audio_path):
-        print(">>Performing VAD...")
+        print("\n>>Performing VAD...")
         segments = self.vad_model(input_audio_path)
         return segments
 

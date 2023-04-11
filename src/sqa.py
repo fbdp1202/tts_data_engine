@@ -26,6 +26,10 @@ from .noresqa.model import NORESQA
 from .utils import load_audio
 
 DAPS_DATASET_URL = 'https://zenodo.org/record/4660670/files/daps.tar.gz?download=1'
+DAPS_N_CLEAN_WAV_NUM = 100
+
+import pdb
+
 
 def md5(fname):
     hash_md5 = hashlib.md5()
@@ -122,20 +126,36 @@ class SpeechQualityAssigner:
 
     def extract_nmr_embbeddings(self, nmr_wav_dir):
 
-        nmr_wav_list = sorted(glob.glob(nmr_wav_dir+"/*/clean/*.wav"))
+        nmr_wav_npy = os.path.join(nmr_wav_dir, 'clean_nmr_n100_{}ms.npy'.format(int(self.nmr_chunk_time*1000)))
+        if not os.path.exists(nmr_wav_npy):
 
-        nmr_wav_list = [
-            nmr_wav_path for nmr_wav_path in nmr_wav_list
-            if not os.path.basename(nmr_wav_path).startswith('.')
-        ]
+            print(">>Prepare nmr waveforms")
+            nmr_wav_list = sorted(glob.glob(nmr_wav_dir+"/daps/clean/*.wav"))
+            nmr_wav_list = [wav_path for wav_path in nmr_wav_list
+                if not wav_path.startswith('.')]
+            
+            assert(len(nmr_wav_list) == DAPS_N_CLEAN_WAV_NUM)
+
+            nmr_wav_arr = []
+            for nmr_wav_path in wav_nmr_list:
+                nmr_waveform = load_audio(nmr_wav_path, sr=self.sr, chunk_time=self.nmr_chunk_time)
+                # nmr_waveform shape: (wav_sr*max_nmr_wav_time,)
+                nmr_wav_arr.append(nmr_waveform)
+            nmr_wav_arr = np.stack(nmr_wav_arr)
+            np.save(nmr_wav_npy, nmr_wav_arr)
+        else:
+            print(">>Load prepared clean nmr waveforms")
+            nmr_wav_arr = np.load(nmr_wav_npy)
+
+        nmr_feat = torch.FloatTensor(nmr_wav_arr).to(self.device)
 
         nmr_embs = []
-        for nmr_wav in tqdm.tqdm(nmr_wav_list):
-            nrm_feat = load_audio(nmr_wav, chunk_time=self.nmr_chunk_time, sr=self.sr)
-            nrm_feat = torch.FloatTensor(nrm_feat).to(self.device).unsqueeze(0)
+        for nmr_id in tqdm.tqdm(range(nmr_feat.shape[0])):
+            nmr_feat = nmr_feat[nmr_id:nmr_id+1]
 
             with torch.no_grad():
-                nmr_emb = self.sqa_model.extract_embeddings(nrm_feat)
+                nmr_emb = self.sqa_model.extract_embeddings(nmr_feat)
+
             nmr_embs.append(nmr_emb.detach().cpu())
 
         nmr_embs = torch.vstack(nmr_embs)
