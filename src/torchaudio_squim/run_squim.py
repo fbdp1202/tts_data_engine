@@ -1,6 +1,7 @@
 import os
 import wave
 import glob
+import tqdm
 import random
 import numpy as np
 import pandas as pd
@@ -60,7 +61,7 @@ def run_squim_objective(root_wav_dir, result_csv_dir, device, wav_sr=16000, use_
     model.eval()
 
     csv_list = sorted(glob.glob(result_csv_dir+"/*.csv"))
-    for csv_path in csv_list:
+    for csv_path in tqdm.tqdm(csv_list):
         yt_name = os.path.splitext(os.path.basename(csv_path))[0]
         wav_path = os.path.join(root_wav_dir, yt_name, 'wav', yt_name+'.wav')
         assert(os.path.exists(wav_path)), "No Exists Wav File: {}".format(wav_path)
@@ -89,7 +90,7 @@ def run_squim_objective(root_wav_dir, result_csv_dir, device, wav_sr=16000, use_
             for (key, score) in zip(keys, scores):
                 score = score.detach().cpu().item()
                 result_dict[key].append(score)
-                print("{}: {}".format(key, score), end='')
+                print("{}: {:.3f}, ".format(key, score), end='')
             print("")
         
         for key in keys:
@@ -111,7 +112,7 @@ def run_squim_subjective(root_wav_dir, result_csv_dir, nmr_wav_arr, device, wav_
     model.eval()
 
     csv_list = sorted(glob.glob(result_csv_dir+"/*.csv"))
-    for csv_path in csv_list:
+    for csv_path in tqdm.tqdm(csv_list):
         yt_name = os.path.splitext(os.path.basename(csv_path))[0]
         wav_path = os.path.join(root_wav_dir, yt_name, 'wav', yt_name+'.wav')
         assert(os.path.exists(wav_path)), "No Exists Wav File: {}".format(wav_path)
@@ -142,13 +143,11 @@ def run_squim_subjective(root_wav_dir, result_csv_dir, nmr_wav_arr, device, wav_
                 end = min(start + chunk_size, n_test_frames)
                 duration = int(end-start)
 
-                print(start, end, duration)
                 chunk_test_waveform = seg_waveform[:, start:end]
                 chunk_test_waveform = chunk_test_waveform.repeat(nmr_wav_arr.shape[0], 1)
 
                 chunk_nmr_waveform = nmr_waveform[:,:duration]
                 with torch.no_grad():
-                    print(chunk_test_waveform.shape, chunk_nmr_waveform.shape)
                     score = model(chunk_test_waveform, chunk_nmr_waveform)
                 score = score.mean().detach().cpu().item()
                 mos_scores.append(score)
@@ -185,10 +184,10 @@ if __name__ == '__main__':
         nmr_wav_list = [wav_path for wav_path in nmr_wav_list
             if not wav_path.startswith('.')]
         
-        assert(len(nmr_wav_list) == DAPS_N_CLEAN_WAV_NUM), "Error not match NMR wav file number: {} : 100".foramt(len(wav_nmr_list))
+        assert(len(nmr_wav_list) == DAPS_N_CLEAN_WAV_NUM), "Error not match NMR wav file number: {} : 100".foramt(len(nmr_wav_list))
         
         nmr_wav_arr = []
-        for nmr_wav_path in wav_nmr_list:
+        for nmr_wav_path in nmr_wav_list:
 
             nmr_waveform = load_audio(nmr_wav_path, sr=wav_sr, chunk_time=max_nmr_wav_time)
             # nmr_waveform shape: (wav_sr*max_nmr_wav_time,)
@@ -204,9 +203,3 @@ if __name__ == '__main__':
     run_squim_objective(root_wav_dir, result_csv_dir, device, wav_sr=wav_sr, use_round=use_round)
 
     run_squim_subjective(root_wav_dir, result_csv_dir, nmr_wav_arr, device, wav_sr=wav_sr, use_round=use_round)
-    
-
-        
-    
-
-
