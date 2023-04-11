@@ -12,13 +12,15 @@ from pyannote.audio import Model, Pipeline
 
 from whisperx.vad import load_vad_model, Binarize
 
-from .utils import get_wav_duration, myfloor
+from .utils import get_wav_duration, myfloor, load_annot_from_lab
 
 import pdb
 
 
 class SpeechDetector:
+
     def __init__(self, args):
+
         # VAD config
         device: str = args['device']
         hf_token: str = args['hf_token']
@@ -92,13 +94,17 @@ class SpeechDetector:
         if verbose:
             print('>>Save VAD results: {}'.format(save_lab_path))
 
-    def __call__(self, audio_file_path, visualize=False, save_vad=True, verbose=False):
+    def __call__(self, audio_file_path, visualize=False, save_vad=True, overwrite=False, verbose=False):
 
-        input_audio_path = self.check_audio_file(audio_file_path)
+        save_lab_name = os.path.splitext(os.path.basename(audio_file_path))[0]+'.lab'
+        save_lab_path = os.path.join(self.save_lab_dir, save_lab_name)
+        if not overwrite and os.path.exists(save_lab_path):
+            binarized_segments = load_annot_from_lab(save_lab_path)
+            return binarized_segments
 
-        wav_duration = myfloor(get_wav_duration(input_audio_path), 3)
+        wav_duration = myfloor(get_wav_duration(audio_file_path), 3)
 
-        vad_segments = self.run_segmentation(input_audio_path)
+        vad_segments = self.run_segmentation(audio_file_path)
 
         binarized_segments = self.padding_vad(vad_segments, wav_duration)
 
@@ -108,10 +114,7 @@ class SpeechDetector:
 
         if save_vad:
             # write vad segment in .lab file
-            save_lab_name = os.path.splitext(os.path.basename(audio_file_path))[0]+'.lab'
-            save_lab_path = os.path.join(self.save_lab_dir, save_lab_name)
-
             print(">>Save VAD result in {}".format(save_lab_path))
             self.save_vad_result(binarized_segments, save_lab_path, verbose=verbose)
 
-        return binarized_segments, input_audio_path
+        return binarized_segments

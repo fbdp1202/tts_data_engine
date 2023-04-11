@@ -21,19 +21,35 @@ class CleanSpeechDetector:
         self.csd_csv_dir: str = args['csd_csv_dir']
         os.makedirs(self.csd_csv_dir, exist_ok=True)
 
+        self.se_out_postfix: str = args['se_out_postfix']
+
         self.vad_manager = SpeechDetector(args)
         self.sqa_manager = SpeechQualityAssigner(args)
         self.sc_manager = SoundClassifier(args)
+
+    def set_vad_wav_name(self, audio_file_path, use_se=False):
+
+        vad_audio_path = audio_file_path
+        if use_se:
+            audio_file_name = os.path.splitext(audio_file_path)[0]
+            se_audio_file_path = audio_file_name + self.se_out_postfix + '.wav'
+            if os.path.exists(se_audio_file_path):
+                vad_audio_path = se_audio_file_path
+            else:
+                print("No Exists Speech Enhanced wav: {}".format(se_audio_file_path))
+        
+        return vad_audio_path
 
     def run_segments(self, input_audio_path, out_vad, topk=5, save_csv=True, use_round=True):
 
         waveform = load_audio(input_audio_path, sr=self.sr)
         waveform = torch.FloatTensor(waveform)
 
-        columns = ["index", "start", "end", "estimated_MOS"]
+        columns = ["index", "start", "end"]
         for k in range(topk):
             for name in ['code', 'name', 'pred']:
                 columns.append("top{}_{}".format(k+1, name))
+        columns.append("NORESQA_MOS")
 
         results = {}
         for col in columns:
@@ -51,10 +67,10 @@ class CleanSpeechDetector:
             results["index"].append(idx)
             results["start"].append(start_t)
             results["end"].append(end_t)
-            results["estimated_MOS"].append(mos_score)
             for k, (code, name, prob) in enumerate(sc_results):
                 for key, value in zip(['code', 'name', 'pred'], [code, name, prob]):
                     results["top{}_{}".format(k+1, key)].append(value)
+            results["NORESQA_MOS"].append(mos_score)
 
         df = pd.DataFrame.from_dict(results)
 
@@ -70,11 +86,13 @@ class CleanSpeechDetector:
 
         return df
 
-    def __call__(self, audio_file_path):
+    def __call__(self, audio_file_path, use_se=False):
+        
+        vad_audio_path = self.set_vad_wav_name(audio_file_path, use_se=use_se)
 
-        binarized_segments, input_audio_path = self.vad_manager(audio_file_path)
+        binarized_segments = self.vad_manager(vad_audio_path)
 
-        df = self.run_segments(input_audio_path, binarized_segments)
+        df = self.run_segments(audio_file_path, binarized_segments)
 
         return df
 
@@ -99,14 +117,17 @@ if __name__ == '__main__':
 
     parser.add_argument("--csd_csv_dir", type=str, default='csd/csv', help="path to experiments directory")
 
+    # Speech Enhancement config
+    parser.add_argument('--se_out_postfix', type=str, default='_SE_FRCRN.wav', required=False, help='output postfix string')
+
     # vad config
     parser.add_argument("--vad_tmp_dir", default="vad/tmp_wav", help="Temporary directory to write audio file if input if not .wav format (only for VAD).")
     parser.add_argument("--vad_save_lab_dir", default="vad/lab", help="Temporary directory to write audio file if input if not .wav format (only for VAD).")
     parser.add_argument("--hf_token", type=str, default='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', help="Hugging Face Access Token to access PyAnnote gated models")
     parser.add_argument("--vad_onset", type=float, default=0.500, help="Onset threshold for VAD (see pyannote.audio), reduce this if speech is not being detected")
     parser.add_argument("--vad_offset", type=float, default=0.363, help="Offset threshold for VAD (see pyannote.audio), reduce this if speech is not being detected.")
-    parser.add_argument("--vad_pad_onset", type=float, default=0.500, help="Padding Onset for VAD (see pyannote.audio)")
-    parser.add_argument("--vad_pad_offset", type=float, default=0.500, help="Padding time for VAD (see pyannote.audio)")
+    parser.add_argument("--vad_pad_onset", type=float, default=0.250, help="Padding Onset for VAD (see pyannote.audio)")
+    parser.add_argument("--vad_pad_offset", type=float, default=0.250, help="Padding time for VAD (see pyannote.audio)")
 
     # speech quality assessment config
     parser.add_argument("--sqa_ssl_model_path", type=str, default='models/sqa_models/wav2vec_small.pt', help="pretrained wav2vec base model path")
@@ -114,7 +135,7 @@ if __name__ == '__main__':
     parser.add_argument('--sqa_nmr_wav_dir', type=str, default='/mnt/dataset/daps', required = False, help='path of clean wav file')
     parser.add_argument('--sqa_nmr_feat_path', type=str, default='sqa/noresqa/feat/daps_nmr_embs.pkl', required = False, help='path of nmr embedding pickle file')
     parser.add_argument("--sqa_nmr_chunk_time", type=float, default=3.0, help="nmr wav chunk time")
-    parser.add_argument("--sqa_emb_step_size", type=int, default=50, help="embedding step size") # '50 frames' means 1.0 sec
+    parser.add_argument("--sqa_nmr_step_size", type=int, default=75, help="embedding step size")
 
     # sound classification config
     parser.add_argument('--sc_ontology_file_path', type=str, default='data/BEATs/ontology.json', required=False, help='path of audioset ontology')

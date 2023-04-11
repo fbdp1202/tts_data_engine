@@ -13,6 +13,7 @@ from whisper.audio import SAMPLE_RATE
 
 from src.utils import set_seeds
 from src.url_loader import YoutubeLoader
+from src.enhance import SpeechEnhancer
 from src.collector import CleanSpeechDetector
 from src.engine import DataEngine
 from src.visualize import viewer
@@ -42,6 +43,10 @@ def get_args():
     # youtube loader config
     parser.add_argument('--yt_dir', type=str, default='data/youtube', required=False, help='mp4 download directory')
 
+    # speech enhancement config
+    parser.add_argument('--se_out_postfix', type=str, default='_SE_FRCRN', required=False, help='output postfix string')
+    parser.add_argument('--use_se', type=bool, default=True, required=False, help='True if you use speech enhancement mode')
+
     # clean speech detector config
     parser.add_argument("--csd_csv_dir", type=str, default='csd/csv', help="path to experiments directory")
 
@@ -51,7 +56,7 @@ def get_args():
     parser.add_argument('--sqa_nmr_wav_dir', type=str, default='/mnt/dataset/daps', required = False, help='path of clean wav file')
     parser.add_argument('--sqa_nmr_feat_path', type=str, default='sqa/noresqa/feat/daps_nmr_embs.pkl', required = False, help='path of nmr embedding pickle file')
     parser.add_argument("--sqa_nmr_chunk_time", type=float, default=3.0, help="nmr wav chunk time")
-    parser.add_argument("--sqa_emb_step_size", type=int, default=50, help="embedding step size")
+    parser.add_argument("--sqa_nmr_step_size", type=int, default=75, help="embedding step size")
 
     # sound classification config
     parser.add_argument('--sc_ontology_file_path', type=str, default='data/BEATs/ontology.json', required=False, help='path of audioset ontology')
@@ -73,8 +78,8 @@ def get_args():
     parser.add_argument("--vad_filter", default=True, help="Whether to pre-segment audio with VAD, highly recommended! Produces more accurate alignment + timestamp see WhisperX paper https://arxiv.org/abs/2303.00747")
     parser.add_argument("--vad_onset", type=float, default=0.500, help="Onset threshold for VAD (see pyannote.audio), reduce this if speech is not being detected")
     parser.add_argument("--vad_offset", type=float, default=0.363, help="Offset threshold for VAD (see pyannote.audio), reduce this if speech is not being detected.")
-    parser.add_argument("--vad_pad_onset", type=float, default=0.500, help="Padding Onset for VAD (see pyannote.audio)")
-    parser.add_argument("--vad_pad_offset", type=float, default=0.500, help="Padding time for VAD (see pyannote.audio)")
+    parser.add_argument("--vad_pad_onset", type=float, default=0.250, help="Padding Onset for VAD (see pyannote.audio)")
+    parser.add_argument("--vad_pad_offset", type=float, default=0.250, help="Padding time for VAD (see pyannote.audio)")
 
     # diarization params
     parser.add_argument("--no_diarize", action="store_false", help="Apply diarization to assign speaker labels to each segment/word")
@@ -124,23 +129,44 @@ def main():
     set_seeds(args['seed'])
 
     overwrite: bool = args.pop("overwrite")
+    use_se: bool = args['use_se']
 
     url = 'https://www.youtube.com/playlist?list=PLrT4uvwaf6uw5ChxpBQnx0dA5fcmXvuB_'
+    # url = 'https://www.youtube.com/watch?v=jane6C4rIwc'
 
     downloader = YoutubeLoader(args)
+    enhancer = SpeechEnhancer(args)
     detector = CleanSpeechDetector(args)
 
-    dir_list = downloader(url)
+    # download youtube clip
+    dir_list = sorted(downloader(url))
 
-    df_list = []
-    for dir_name in tqdm.tqdm(dir_list):
+    # generate wav list
+    wav_list = []
+    for dir_name in dir_list:
+
         basename = os.path.basename(dir_name)
         
         wav_path = os.path.join(dir_name, 'wav', basename+".wav")
         assert(os.path.exists(wav_path)), "No Exists Wav File: {}".format(wav_path)
-        
-        result = detector(wav_path)
-        df_list.append(result)
+
+        wav_list.append(wav_path)
+
+    # run speech enhancement
+    use_se: bool = args['use_se']
+    if use_se:
+        se_wav_list = enhancer(wav_list)
+        assert(len(se_wav_list) == len(wav_list)),\
+            "Not Match Speech Enhancement Wav File Number ({} != {})".format(len(se_wav_list), len(wav_list))
+    
+    return
+
+    # run Speech Quality Assessment with Sound Classification
+    df_list = {}
+    for (wav_path, dir_name) in tqdm.tqdm(zip(wav_list, dir_list)):
+
+        result = detector(wav_path, use_se=use_se)
+        df_list[dir_name] = result
 
 # for implementation
     return

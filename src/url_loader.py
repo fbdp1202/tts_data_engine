@@ -169,10 +169,10 @@ class YoutubeLoader:
         yt_info = {}
         if save_spec_info:
             yt_info = self.extract_video_informations(url)
-        else:
-            stream = yt.streams.last()
-            yt_info['title'] = stream.title
-            yt_info['duration'] = stream._monostate.duration
+
+        stream = yt.streams.last()
+        yt_info['title'] = stream.title
+        yt_info['duration'] = stream._monostate.duration
 
         yt_info['high_resolution_mp4_info'] = self.dl_high_res_mp4(yt, yt_mp4_dir, yt_name+'.mp4')
         yt_info['only_audio_mp4_info'] = self.dl_only_audio_mp4(yt, yt_mp4_dir, yt_name+'_audio.mp4')
@@ -227,7 +227,9 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args().__dict__
-    args['yt_url'] = 'https://www.youtube.com/playlist?list=PLrT4uvwaf6uw5ChxpBQnx0dA5fcmXvuB_'
+    url = 'https://www.youtube.com/watch?v=jane6C4rIwc'
+    # url = 'https://www.youtube.com/playlist?list=PLrT4uvwaf6uw5ChxpBQnx0dA5fcmXvuB_'
+    args['yt_url'] = url
 
     yt_url: str = args['yt_url']
 

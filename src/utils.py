@@ -6,6 +6,8 @@ import numpy as np
 
 import torch
 
+from pyannote.core import Annotation, Segment
+
 
 def set_seeds(seed=777, multi_gpu=False):
     random.seed(seed)
@@ -38,6 +40,13 @@ def load_audio(audio_file_path, sr=16000, chunk_time=0, mono=True):
         waveform, _ = librosa.load(audio_file_path, sr=sr, mono=mono)
 
     return waveform
+
+def load_annot_from_lab(save_lab_path, spk_id='Speech'):
+    seg_arr = np.atleast_2d(np.loadtxt(save_lab_path, usecols=(0, 1)))
+    annot = Annotation()
+    for (start, end) in zip(seg_arr[:,0], seg_arr[:,1]):
+        annot[Segment(start, end)] = spk_id
+    return annot
 
 def myfloor(x, p):
     v = 10**p

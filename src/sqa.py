@@ -47,7 +47,7 @@ def download_daps_dataset(out_dir):
     out_file_path = os.path.join(out_dir, 'daps.tar.gz')
     out = subprocess.call('wget {} -O {}'.format(DAPS_DATASET_URL, out_file_path), shell=True)
     if out != 0:
-        raise ValueError('Download failed {}.'.format(url))
+        raise ValueError('Download failed {}.'.format(DAPS_DATASET_URL))
     
     check_daps_dataset(out_file_path)
 
@@ -83,7 +83,7 @@ class SpeechQualityAssigner:
         self.sr: int = args['sr']
         self.model_ckpt_path: str = args['sqa_model_ckpt_path']
         self.nmr_chunk_time: float = args['sqa_nmr_chunk_time']
-        self.emb_step_size: int = args['sqa_emb_step_size']
+        self.nmr_step_size: int = args['sqa_nmr_step_size']
 
         nmr_wav_dir: str = args['sqa_nmr_wav_dir']
         nmr_feat_path: str = args['sqa_nmr_feat_path']
@@ -173,12 +173,12 @@ class SpeechQualityAssigner:
 
             n_test_frames = test_embs.shape[2]
             n_nmr_frames = self.nmr_embs.shape[2]
-            emb_step_size = self.emb_step_size
+            nmr_step_size = self.nmr_step_size
 
             mos_scores = []
-            n_chunk = max(1, int(math.ceil(n_test_frames-n_nmr_frames+emb_step_size)/emb_step_size))
+            n_chunk = max(1, int(math.ceil(n_test_frames-n_nmr_frames+nmr_step_size)/nmr_step_size))
             for n in range(n_chunk):
-                start = emb_step_size*n
+                start = nmr_step_size*n
                 end = min(start + n_nmr_frames, n_test_frames)
                 input_test_embs = test_embs[:,:,start:end]
                 results = self.sqa_model.estimate_score_bw_embs(nmr_embs[:,:,:end-start], input_test_embs)
@@ -232,7 +232,7 @@ if __name__ == '__main__':
     parser.add_argument('--sqa_nmr_wav_dir', type=str, default='/mnt/dataset/daps', required = False, help='path of clean wav file')
     parser.add_argument('--sqa_nmr_feat_path', type=str, default='sqa/noresqa/feat/daps_nmr_embs.pkl', required = False, help='path of nmr embedding pickle file')
     parser.add_argument("--sqa_nmr_chunk_time", type=float, default=3.0, help="nmr wav chunk time")
-    parser.add_argument("--sqa_emb_step_size", type=int, default=50, help="embedding step size")
+    parser.add_argument("--sqa_nmr_step_size", type=int, default=75, help="embedding step size")
 
     args = parser.parse_args().__dict__
     args['sqa_nmr_feat_path'] = os.path.join(args['exp_dir'], args['sqa_nmr_feat_path'])
