@@ -125,6 +125,7 @@ def get_args():
     return args
 
 def main():
+
     args = get_args()
     set_seeds(args['seed'])
 
@@ -135,7 +136,6 @@ def main():
     # url = 'https://www.youtube.com/watch?v=jane6C4rIwc'
 
     downloader = YoutubeLoader(args)
-    enhancer = SpeechEnhancer(args)
     detector = CleanSpeechDetector(args)
 
     # download youtube clip
@@ -155,6 +155,7 @@ def main():
     # run speech enhancement
     use_se: bool = args['use_se']
     if use_se:
+        enhancer = SpeechEnhancer(args)
         se_wav_list = enhancer(wav_list)
         assert(len(se_wav_list) == len(wav_list)),\
             "Not Match Speech Enhancement Wav File Number ({} != {})".format(len(se_wav_list), len(wav_list))
@@ -170,7 +171,6 @@ def main():
     return
 
     engine = DataEngine(args)
-
 
     os.makedirs('feat', exist_ok=True)
     pkl_path = os.path.join('feat',os.path.basename(audio_path).replace('.wav','.pkl'))

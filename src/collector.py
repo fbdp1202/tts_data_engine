@@ -40,7 +40,7 @@ class CleanSpeechDetector:
         
         return vad_audio_path
 
-    def run_segments(self, input_audio_path, out_vad, topk=5, save_csv=True, use_round=True):
+    def run_segments(self, input_audio_path, out_vad, topk=5, use_round=True):
 
         waveform = load_audio(input_audio_path, sr=self.sr)
         waveform = torch.FloatTensor(waveform)
@@ -78,21 +78,22 @@ class CleanSpeechDetector:
         if use_round:
             df = df.round(3)
 
-        if save_csv:
-            save_csv_name = os.path.splitext(os.path.basename(input_audio_path))[0]+'.csv'
-            save_csv_path = os.path.join(self.csd_csv_dir, save_csv_name)
-
-            df.to_csv(save_csv_path)
-
         return df
 
-    def __call__(self, audio_file_path, use_se=False):
+    def __call__(self, audio_file_path, use_se=False, save_csv=True, overwrite=False):
         
         vad_audio_path = self.set_vad_wav_name(audio_file_path, use_se=use_se)
 
         binarized_segments = self.vad_manager(vad_audio_path)
 
         df = self.run_segments(audio_file_path, binarized_segments)
+
+        if save_csv:
+            save_csv_name = os.path.splitext(os.path.basename(input_audio_path))[0]+'.csv'
+            save_csv_path = os.path.join(self.csd_csv_dir, save_csv_name)
+
+            df.to_csv(save_csv_path)
+
 
         return df
 
@@ -149,7 +150,6 @@ if __name__ == '__main__':
     args['sqa_nmr_feat_path'] = os.path.join(args['exp_dir'], args['sqa_nmr_feat_path'])
 
     args['csd_csv_dir'] = os.path.join(args['exp_dir'], args['csd_csv_dir'])
-
 
     set_seeds(args['seed'])
 

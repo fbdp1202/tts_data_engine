@@ -2,6 +2,14 @@ from pyannote.audio import Pipeline
 
 import pdb
 
+
+class SpeakerDiarizer:
+
+    def __init__(self):
+
+    
+
+
 def main():
     use_auth_token="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"
     model_name="pyannote/speaker-diarization@2.1"
