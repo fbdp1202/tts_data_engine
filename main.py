@@ -2,6 +2,7 @@ import argparse
 import os
 import tqdm
 import pickle
+import pandas as pd
 import torch
 from whisper.tokenizer import LANGUAGES, TO_LANGUAGE_CODE
 from whisper.utils import (
@@ -15,6 +16,8 @@ from src.utils import set_seeds
 from src.url_loader import YoutubeLoader
 from src.enhance import SpeechEnhancer
 from src.collector import CleanSpeechDetector
+
+from src.diarize import SpeakerDiarizer
 from src.engine import DataEngine
 from src.visualize import viewer
 
@@ -86,6 +89,9 @@ def get_args():
     parser.add_argument("--min_speakers", default=None, type=int)
     parser.add_argument("--max_speakers", default=None, type=int)
 
+    parser.add_argument("--diar_exp_dir", type=str, default='sd', help="path to diarization experiments directory")
+    parser.add_argument('--diar_model_name', type=str, default='pyannote/speaker-diarization@2.1', required=False, help='pretrained speaker diarization model name')
+
     # whisper params
     parser.add_argument("--temperature", type=float, default=0, help="temperature to use for sampling")
     parser.add_argument("--best_of", type=optional_int, default=5, help="number of candidates when sampling with non-zero temperature")
@@ -122,6 +128,8 @@ def get_args():
 
     args['csd_csv_dir'] = os.path.join(args['exp_dir'], args['csd_csv_dir'])
 
+    args['diar_exp_dir'] = os.path.join(args['exp_dir'], args['diar_exp_dir'])
+
     return args
 
 def main():
@@ -136,15 +144,14 @@ def main():
     # url = 'https://www.youtube.com/watch?v=jane6C4rIwc'
 
     downloader = YoutubeLoader(args)
-    detector = CleanSpeechDetector(args)
 
     # download youtube clip
     dir_list = sorted(downloader(url))
+    del downloader
 
     # generate wav list
     wav_list = []
     for dir_name in dir_list:
-
         basename = os.path.basename(dir_name)
         
         wav_path = os.path.join(dir_name, 'wav', basename+".wav")
@@ -159,32 +166,26 @@ def main():
         se_wav_list = enhancer(wav_list)
         assert(len(se_wav_list) == len(wav_list)),\
             "Not Match Speech Enhancement Wav File Number ({} != {})".format(len(se_wav_list), len(wav_list))
-    
+    del enhancer
+
     # run Speech Quality Assessment with Sound Classification
+    detector = CleanSpeechDetector(args)
+
     df_list = {}
     for (wav_path, dir_name) in tqdm.tqdm(zip(wav_list, dir_list)):
+        csv_path = os.path.join(args['csd_csv_dir'], os.path.basename(dir_name) + ".csv")
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+        else:
+            df = detector(wav_path, use_se=use_se)
+        df_list[dir_name] = df
+    del detector
 
-        result = detector(wav_path, use_se=use_se)
-        df_list[dir_name] = result
-
-# for implementation
-    return
-
-    engine = DataEngine(args)
-
-    os.makedirs('feat', exist_ok=True)
-    pkl_path = os.path.join('feat',os.path.basename(audio_path).replace('.wav','.pkl'))
-    if not os.path.exists(pkl_path) and not overwrite:
-        result = engine.infer(audio_path)
-
-        with open(pkl_path, 'wb') as handle:
-            pickle.dump(result, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    else:
-        print("Skip whisperX")
-        with open(pkl_path, 'rb') as handle:
-            result = pickle.load(handle)
-
-    viewer(audio_path, result)
+    # run speaker diarization
+    diarizer = SpeakerDiarizer(args)
+    for wav_path, dir_name in tqdm.tqdm(zip(wav_list, dir_list)):
+        _ = diarizer(wav_path)
+    del diarizer
 
 if __name__ == "__main__":
     main()

@@ -32,7 +32,8 @@ def get_labels(json_path):
 def get_wspx_result(result):
     wspx_diar = Annotation()
 
-    segments = result['word_segments']
+    # segments = result['word_segments']
+    segments = result['segments']
     for seg in segments:
         start, end  = seg['start'], seg['end']
         spk_id      = seg['text'].split(':')[0].replace('[','').replace(']','')
@@ -52,7 +53,7 @@ def plot_waveform(y, ax, xlabel=None, ylabel=None, tight=False):
     ax.xaxis.set_visible(False)
 
 
-def plot_spectogram(S_dB, sample_rate, ax):
+def plot_spectrogram(S_dB, sample_rate, ax):
     librosa.display.specshow(S_dB, sr=sample_rate, x_axis='time', y_axis='hz', ax=ax)
     ax.autoscale(enable=True, axis='x', tight=True)
 
@@ -70,15 +71,22 @@ def custom_plot(plot_func, data, ax, view_size=None, tight=False, time=True, leg
     ax.xaxis.set_visible(False)
 
 
-def plot_annotations(annotations, save_fig_path, view_size=None):
+def plot_annotations(annotations, save_fig_path, view_size=None, wav_path=None):
     num_annotation = len(annotations)
     if num_annotation == 0:
         print("Empty annotation. There are no plot annotation")
         return
 
+    if wav_path is not None:
+        num_annotation += 2
+
     fig, axes = plt.subplots(nrows=num_annotation, ncols=1, figsize=(30, num_annotation*4))
     if num_annotation == 1:
         axes = [axes]
+
+    if wav_path is not None:
+        view_size = plot_waveform_and_spectrogram(wav_path, axes[:2], view_size=view_size)
+        axes = axes[2:]
 
     for _, (ax, annotation) in enumerate(zip(axes, annotations)):
         custom_plot(notebook.plot_annotation, annotation, ax, view_size=view_size)
@@ -87,6 +95,26 @@ def plot_annotations(annotations, save_fig_path, view_size=None):
     fig.savefig(save_fig_path)
     plt.close('all')
 
+def load_wav_and_spectrogram(audio_file_path):
+    y, sr = librosa.load(audio_file_path)
+    t = ((y.shape[0]*100)//sr)/100.0
+    y = y[:int(sr*t)]
+    S_dB = librosa.amplitude_to_db(np.abs(librosa.stft(y, n_fft=4096, win_length=4096, hop_length=512)), ref=np.max)
+    return y, S_dB, sr, t
+
+def plot_waveform_and_spectrogram(audio_file_path, axes, view_size=None):
+    y, S_dB, sr, t = load_wav_and_spectrogram(audio_file_path)
+
+    if view_size is None:
+        view_size = t
+
+    if view_size > 0:
+        notebook.crop = Segment(0, view_size)
+
+    plot_waveform(y, axes[0], xlabel='sample rate * time', ylabel='energy', tight=True)
+    plot_spectrogram(S_dB, sr, axes[1])
+
+    return view_size
 
 def viewer(audio_file_path, result):
     label_path  = '/mnt/whisper/whisper/The_Dark_Knight_gt.json'
@@ -96,16 +124,8 @@ def viewer(audio_file_path, result):
 
     fig, axes = plt.subplots(nrows=4, ncols=1, figsize=(30, 18))
 
-    y, sample_rate = librosa.load(audio_file_path)
-    t = view_size = ((y.shape[0]*100)//sample_rate)/100.0
-    y = y[:int(sample_rate*t)]
-    S_dB = librosa.amplitude_to_db(np.abs(librosa.stft(y, n_fft=4096, win_length=4096, hop_length=512)), ref=np.max)
+    plot_waveform_and_spectrogram(audio_file_path, axes[0:2])
 
-    if view_size > 0:
-        notebook.crop = Segment(0, view_size)
-
-    plot_waveform(y, axes[0], xlabel='sample rate * time', ylabel='energy', tight=True)
-    plot_spectogram(S_dB, sample_rate, axes[1])
     custom_plot(notebook.plot_annotation,   wspx_diar,  axes[2], view_size=view_size)
     custom_plot(notebook.plot_annotation,   gt_diar,    axes[3], view_size=view_size)
     
