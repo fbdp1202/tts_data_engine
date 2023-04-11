@@ -4,12 +4,11 @@ import subprocess
 import json
 from pytube import YouTube, Playlist
 from pytube.cli import on_progress
+from moviepy.editor import AudioFileClip
 
 from requests_html import HTMLSession
 from bs4 import BeautifulSoup as bs
 import re
-
-import pdb
 
 
 class YoutubeLoader:
@@ -82,31 +81,44 @@ class YoutubeLoader:
         save_info_path = os.path.join(yt_dir, 'video_info.data')
         with open(save_info_path, 'w') as wf:
             for key, value in yt_info.items():
-                if isinstance(value, str):
-                    wf.write("{}: {}\n".format(key, value))
                 if isinstance(value, dict):
                     wf.write("{}\n".format(key))
                     for sub_key, sub_value in value.items():
                         wf.write("\t{}: {}\n".format(sub_key, sub_value))
+                elif isinstance(value, list):
+                    wf.write("{}\n".format(key))
+                    wf.write("\t[")
+                    for sub_id, sub_value in enumerate(value):
+                        wf.write(sub_value)
+                        if len(value) != sub_id-1:
+                            wf.write(",")
+                    wf.write("]\n")
+                else:
+                    wf.write("{}: {}\n".format(key, value))
+
 
     def dl_high_res_mp4(self, yt, output_path, file_name):
+
+        stream_info = {}
+
         stream = yt.streams.get_highest_resolution()
         _ = stream.download(output_path=output_path, filename=file_name)
 
-        stream_info = {}
         stream_info['itag'] = stream.itag
         stream_info['mime_type'] = stream.mime_type
         stream_info['resolution'] = stream.resolution
-        stream_info['fps'] = stream.fps
+        stream_info['video_fps'] = stream.fps
         stream_info['video_codec'] = stream.video_codec
         stream_info['audio_codec'] = stream.audio_codec
         return stream_info
 
     def dl_only_audio_mp4(self, yt, output_path, file_name):
+
+        stream_info = {}
+
         stream = yt.streams.filter(only_audio=True, file_extension='mp4').order_by('abr').last()
         _ = stream.download(output_path=output_path, filename=file_name)
 
-        stream_info = {}
         stream_info['itag'] = stream.itag
         stream_info['mime_type'] = stream.mime_type
         stream_info['audio_codec'] = stream.audio_codec
@@ -115,6 +127,7 @@ class YoutubeLoader:
         return stream_info
 
     def dl_captions(self, captions, yt_dir, yt_name):
+
         caption_info = {}
         if len(captions) == 0:
             caption_info["code"]=""
@@ -135,12 +148,14 @@ class YoutubeLoader:
         return caption_info
 
     def convert_mp4_to_wav(self, yt_dir, yt_name):
+
         hr_video_path = os.path.join(yt_dir, "mp4", yt_name+'.mp4')
         hq_video_path = os.path.join(yt_dir, "mp4", yt_name+'_audio.mp4')
         assert(os.path.exists(hr_video_path) or os.path.exists(hq_video_path)), "Both Youtube Not Downloaded: {}".format(url)
 
         video_file_path = hq_video_path if os.path.exists(hq_video_path) else hr_video_path
 
+        # save wav
         audio_dir = os.path.join(yt_dir, "wav")
         os.makedirs(audio_dir, exist_ok=True)
 
@@ -148,11 +163,13 @@ class YoutubeLoader:
 
         command = ("ffmpeg -y -i %s -qscale:a 0 -ac 1 -vn -threads %d -ar %d %s -loglevel panic" % \
 		    (video_file_path, self.num_threads, self.sr, audio_file_path))
-        subprocess.call(command, shell=True, stdout=None)
+        out = subprocess.call(command, shell=True, stdout=None)
+        if out != 0:
+            raise ValueError("Error: Converting mp4 to wav: {}".format(command))
 
     def dl_youtube(self, url, dl_caption=True, save_spec_info=True, overwrite=False):
 
-        print(">>Download Youtube URL: {}".format(url))
+        print("\n>>Download Youtube URL: {}".format(url))
 
         pos = url.find(self.url_tag)+len(self.url_tag)
         yt_name = url[pos:]
@@ -174,6 +191,7 @@ class YoutubeLoader:
         yt_info['title'] = stream.title
         yt_info['duration'] = stream._monostate.duration
 
+
         yt_info['high_resolution_mp4_info'] = self.dl_high_res_mp4(yt, yt_mp4_dir, yt_name+'.mp4')
         yt_info['only_audio_mp4_info'] = self.dl_only_audio_mp4(yt, yt_mp4_dir, yt_name+'_audio.mp4')
         
@@ -184,14 +202,20 @@ class YoutubeLoader:
 
         self.convert_mp4_to_wav(yt_dir, yt_name)
 
+        only_audio_mp4_path = os.path.join(yt_mp4_dir, yt_name+'_audio.mp4')
+        if os.path.exists(only_audio_mp4_path):
+            os.remove(only_audio_mp4_path)
+
         f = open(yt_dir+"/.done", "w")
         f.close()
         return yt_dir
 
     def dl_playlist(self, pl_url, overwrite=False):
+
         p = Playlist(pl_url)
         yt_dir_list = []
-        for url in tqdm.tqdm(p.video_urls):
+
+        for url in tqdm.tqdm(sorted(p.video_urls)):
             yt_dir = self.dl_youtube(url, overwrite=overwrite)
             yt_dir_list.append(yt_dir)
         return yt_dir_list
