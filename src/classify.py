@@ -98,19 +98,22 @@ class SoundClassifier:
         waveform = waveform.to(self.device).unsqueeze(0)
         n_test_frames = waveform.shape[1]
 
+
         pred_list = []
         n_chunk = max(1, int(math.ceil((n_test_frames-chunk_size+step_size)/step_size)))
         for chunk_id in range(n_chunk):
-            
+
             start = int(step_size * chunk_id)
             end = min(start + chunk_size, n_test_frames)
             duration = int(end-start)
 
-            chunk_waveform = waveform[:,start:end]
+            chunk_waveform = torch.zeros(1,chunk_size).to(self.device)
+            chunk_waveform[:,:duration] = waveform[:,start:end]
 
             chunk_mask = None
             if mask is not None:
-                chunk_mask = mask[start:end]
+                chunk_mask = torch.zeros(1, chunk_size, dtype=torch.bool).to(self.device)
+                chunk_mask[:,:duration] = mask[start:end]
 
             with torch.no_grad():
                 pred = self.model.extract_features(chunk_waveform, padding_mask=chunk_mask)[0]
@@ -145,7 +148,6 @@ class SoundClassifier:
             for start, end in zip(seg_arr[:,0], seg_arr[:,1]):
                 seg_waveform = waveform[start:end]
                 pred = self.predict(seg_waveform)
-                start_t, end_t = start/self.sr, end/self.sr
 
                 pred_list.append(pred.numpy())
             pred = np.stack(pred_list)

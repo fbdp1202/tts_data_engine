@@ -48,7 +48,7 @@ def get_args():
 
     # speech enhancement config
     parser.add_argument('--se_out_postfix', type=str, default='_SE_FRCRN', required=False, help='output postfix string')
-    parser.add_argument('--use_se', type=bool, default=True, required=False, help='True if you use speech enhancement mode')
+    parser.add_argument('--use_se', type=bool, default=False, required=False, help='True if you use speech enhancement mode')
 
     # clean speech detector config
     parser.add_argument("--csd_csv_dir", type=str, default='csd/csv', help="path to experiments directory")
@@ -138,10 +138,13 @@ def main():
     set_seeds(args['seed'])
 
     overwrite: bool = args.pop("overwrite")
-    use_se: bool = args['use_se']
 
-    url = 'https://www.youtube.com/playlist?list=PLrT4uvwaf6uw5ChxpBQnx0dA5fcmXvuB_'
+    # The Dark Knight
+    # url = 'https://www.youtube.com/playlist?list=PLrT4uvwaf6uw5ChxpBQnx0dA5fcmXvuB_'
     # url = 'https://www.youtube.com/watch?v=jane6C4rIwc'
+    # url = 'https://www.youtube.com/watch?v=Wb6Oc1_SdJw'
+    # 냥이아빠
+    url = 'https://www.youtube.com/playlist?list=PL-28pfEORGTTyRFb-HLE-xlugbi8nDBb3'
 
     downloader = YoutubeLoader(args)
 
@@ -160,13 +163,14 @@ def main():
         wav_list.append(wav_path)
 
     # run speech enhancement
-    use_se: bool = args['use_se']
+    # use_se: bool = args['use_se']
+    use_se: bool = False
     if use_se:
         enhancer = SpeechEnhancer(args)
         se_wav_list = enhancer(wav_list)
         assert(len(se_wav_list) == len(wav_list)),\
             "Not Match Speech Enhancement Wav File Number ({} != {})".format(len(se_wav_list), len(wav_list))
-    del enhancer
+        del enhancer
 
     # run Speech Quality Assessment with Sound Classification
     detector = CleanSpeechDetector(args)
@@ -174,7 +178,7 @@ def main():
     df_list = {}
     for (wav_path, dir_name) in tqdm.tqdm(zip(wav_list, dir_list)):
         csv_path = os.path.join(args['csd_csv_dir'], os.path.basename(dir_name) + ".csv")
-        if os.path.exists(csv_path):
+        if os.path.exists(csv_path) and not overwrite:
             df = pd.read_csv(csv_path)
         else:
             df = detector(wav_path, use_se=use_se)

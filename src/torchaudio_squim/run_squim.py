@@ -2,15 +2,17 @@ import os
 import wave
 import glob
 import tqdm
+import math
 import random
 import numpy as np
 import pandas as pd
 import librosa
-import math
 
 import torch
 import torchaudio
 from torchaudio.prototype.pipelines import SQUIM_OBJECTIVE, SQUIM_SUBJECTIVE
+
+from url_loader import YoutubeLoader
 
 import pdb
 
@@ -81,14 +83,36 @@ def run_squim_objective(root_wav_dir, result_csv_dir, device, wav_sr=16000, use_
 
         for start_t, end_t in zip(df['start'], df['end']):
 
-            start = int(start_t * wav_sr)
-            end = int(end_t * wav_sr)
-            with torch.no_grad():
-                seg_waveform = waveform[:,start:end]
-                scores = model(seg_waveform)
+            seg_start = int(start_t * wav_sr)
+            seg_end = int(end_t * wav_sr)
+
+            scores_dict = {}
+            for key in keys:
+                scores_dict[key] = []
+            
+            seg_waveform = waveform[:,seg_start:seg_end]
+
+            window_time = 3.0
+            window_size = int(wav_sr * window_time)
+            stride_size = int(0.5 * window_size)
+
+            n_frames = int(seg_waveform.shape[1])
+            n_chunks = max(1, math.ceil((n_frames-window_size+stride_size)/stride_size))
+            for chunk_id in range(n_chunks):
+                start = int(stride_size * chunk_id)
+                end = min(start + window_size, n_frames)
+                chunk_waveform = seg_waveform[:, start:end]
+                with torch.no_grad():
+                    scores = model(chunk_waveform)
+                    for (key, score) in zip(keys, scores):
+                        score = score.detach().cpu().item()
+                        scores_dict[key].append(score)
+                
+            scores = []
+            for key in keys:
+                scores.append(np.mean(scores_dict[key]))
 
             for (key, score) in zip(keys, scores):
-                score = score.detach().cpu().item()
                 result_dict[key].append(score)
                 print("{}: {:.3f}, ".format(key, score), end='')
             print("")
@@ -120,7 +144,6 @@ def run_squim_subjective(root_wav_dir, result_csv_dir, nmr_wav_arr, device, wav_
         df = pd.read_csv(csv_path)
 
         waveform, sr = torchaudio.load(wav_path)
-        waveform = waveform.to(device)
         nmr_waveform = torch.FloatTensor(nmr_wav_arr).to(device)
 
         mos_score_list = []
@@ -146,10 +169,21 @@ def run_squim_subjective(root_wav_dir, result_csv_dir, nmr_wav_arr, device, wav_
                 chunk_test_waveform = seg_waveform[:, start:end]
                 chunk_test_waveform = chunk_test_waveform.repeat(nmr_wav_arr.shape[0], 1)
 
+                chunk_test_waveform = chunk_test_waveform.to(device)
+
                 chunk_nmr_waveform = nmr_waveform[:,:duration]
+                batch_size = 32
+                n_samples = chunk_test_waveform.shape[0]
+                n_chunk = int((n_samples-1)/batch_size) + 1
+                scores = []
                 with torch.no_grad():
-                    score = model(chunk_test_waveform, chunk_nmr_waveform)
-                score = score.mean().detach().cpu().item()
+                    for chunk_id in range(n_chunk):
+                        b_start = chunk_id * batch_size
+                        b_end = min((chunk_id+1) * batch_size, n_samples)
+                        score = model(chunk_test_waveform[b_start:b_end], chunk_nmr_waveform[b_start:b_end])
+                        scores.append(score)
+                scores = torch.concat(scores)
+                score = scores.mean().detach().cpu().item()
                 mos_scores.append(score)
             
             final_score = np.mean(mos_scores)
@@ -166,8 +200,33 @@ def run_squim_subjective(root_wav_dir, result_csv_dir, nmr_wav_arr, device, wav_
 
 
 if __name__ == '__main__':
-    root_wav_dir = '/mnt/labelmaker/labelmaker/data/youtube'
-    result_csv_dir = '/mnt/labelmaker/labelmaker/exps/csd/csv'
+    """
+    Get an argument parser.
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--sr', type=int, default=16000, required = False, help='sampling rate')
+    parser.add_argument('--yt_url', type=str, default='https://www.youtube.com/watch?v=jane6C4rIwc', required=False, help='path of test wav file')
+    parser.add_argument('--yt_dir', type=str, default='data/youtube', required=False, help='mp4 download directory')
+    parser.add_argument('--num_threads', type=int, default=0, required = False, help='number of threads')
+
+    args = parser.parse_args().__dict__
+    # url = 'https://www.youtube.com/watch?v=jane6C4rIwc'
+    # url = 'https://www.youtube.com/playlist?list=PLrT4uvwaf6uw5ChxpBQnx0dA5fcmXvuB_'
+    # 냥이아빠
+    url = 'https://www.youtube.com/playlist?list=PL-28pfEORGTTyRFb-HLE-xlugbi8nDBb3'
+
+    args['yt_url'] = url
+
+    yt_url: str = args['yt_url']
+
+    yl = YoutubeLoader(args)
+    yt_dir_list = yl(yt_url)
+
+    wav_dir = '/mnt/labelmaker/labelmaker/data/youtube'
+    csv_dir = '/mnt/labelmaker/labelmaker/exps/csd/csv'
+
     wav_sr = 16000
     use_round = True
     max_nmr_wav_time = 3.0
@@ -200,6 +259,6 @@ if __name__ == '__main__':
         print(">>Load prepared clean nmr waveforms")
         nmr_wav_arr = np.load(nmr_wav_npy)
 
-    run_squim_objective(root_wav_dir, result_csv_dir, device, wav_sr=wav_sr, use_round=use_round)
+    # run_squim_objective(wav_dir, csv_dir, device, wav_sr=wav_sr, use_round=use_round)
 
-    run_squim_subjective(root_wav_dir, result_csv_dir, nmr_wav_arr, device, wav_sr=wav_sr, use_round=use_round)
+    run_squim_subjective(wav_dir, csv_dir, nmr_wav_arr, device, wav_sr=wav_sr, use_round=use_round)

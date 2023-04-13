@@ -89,7 +89,7 @@ class CleanSpeechDetector:
         df = self.run_segments(audio_file_path, binarized_segments)
 
         if save_csv:
-            save_csv_name = os.path.splitext(os.path.basename(input_audio_path))[0]+'.csv'
+            save_csv_name = os.path.splitext(os.path.basename(audio_file_path))[0]+'.csv'
             save_csv_path = os.path.join(self.csd_csv_dir, save_csv_name)
 
             df.to_csv(save_csv_path)

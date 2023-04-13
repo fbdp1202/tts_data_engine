@@ -4,11 +4,11 @@ import subprocess
 import json
 from pytube import YouTube, Playlist
 from pytube.cli import on_progress
-from moviepy.editor import AudioFileClip
+# from moviepy.editor import AudioFileClip
 
-from requests_html import HTMLSession
-from bs4 import BeautifulSoup as bs
-import re
+# from requests_html import HTMLSession
+# from bs4 import BeautifulSoup as bs
+# import re
 
 
 class YoutubeLoader:
@@ -162,12 +162,12 @@ class YoutubeLoader:
         audio_file_path = os.path.join(audio_dir, yt_name+'.wav')
 
         command = ("ffmpeg -y -i %s -qscale:a 0 -ac 1 -vn -threads %d -ar %d %s -loglevel panic" % \
-		    (video_file_path, self.num_threads, self.sr, audio_file_path))
+            (video_file_path, self.num_threads, self.sr, audio_file_path))
         out = subprocess.call(command, shell=True, stdout=None)
         if out != 0:
             raise ValueError("Error: Converting mp4 to wav: {}".format(command))
 
-    def dl_youtube(self, url, dl_caption=True, save_spec_info=True, overwrite=False):
+    def dl_youtube(self, url, dl_caption=True, save_spec_info=False, overwrite=False):
 
         print("\n>>Download Youtube URL: {}".format(url))
 
@@ -186,6 +186,10 @@ class YoutubeLoader:
         yt_info = {}
         if save_spec_info:
             yt_info = self.extract_video_informations(url)
+        
+        if not 'streamingData' in yt.vid_info.keys():
+            print(">>Can't Download Youtube: {}".format(url))
+            return None
 
         stream = yt.streams.last()
         yt_info['title'] = stream.title
@@ -217,7 +221,8 @@ class YoutubeLoader:
 
         for url in tqdm.tqdm(sorted(p.video_urls)):
             yt_dir = self.dl_youtube(url, overwrite=overwrite)
-            yt_dir_list.append(yt_dir)
+            if yt_dir is not None:
+                yt_dir_list.append(yt_dir)
         return yt_dir_list
 
     def __call__(self, url, overwrite=False):
@@ -226,7 +231,10 @@ class YoutubeLoader:
 
         if self.url_tag in url:
             yt_dir = self.dl_youtube(url, overwrite=overwrite)
-            yt_dir = [yt_dir]
+            if yt_dir is None:
+                yt_dir = []
+            else:
+                yt_dir = [yt_dir]
 
         elif self.url_pl_tag in url:
             yt_dir = self.dl_playlist(url, overwrite=overwrite)
@@ -248,7 +256,7 @@ if __name__ == '__main__':
     parser.add_argument('--sr', type=int, default=SAMPLE_RATE, required = False, help='sampling rate')
     parser.add_argument('--yt_url', type=str, default='https://www.youtube.com/watch?v=jane6C4rIwc', required=False, help='path of test wav file')
     parser.add_argument('--yt_dir', type=str, default='data/youtube', required=False, help='mp4 download directory')
-
+    parser.add_argument('--num_threads', type=int, default=0, required = False, help='number of threads')
 
     args = parser.parse_args().__dict__
     url = 'https://www.youtube.com/watch?v=jane6C4rIwc'

@@ -48,6 +48,13 @@ def load_annot_from_lab(save_lab_path, spk_id='Speech'):
         annot[Segment(start, end)] = spk_id
     return annot
 
+# def load_annot_from_rttm(save_rttm_path):
+#     seg_arr = np.atleast_2d(np.loadtxt(save_rttm_path, usecols=(3, 4, 7)))
+#     annot = Annotation()
+#     for (start, end, spk_id) in zip(seg_arr[:,0], seg_arr[:,1], seg_arr[:,2]):
+#         annot[Segment(start, end)] = spk_id
+#     return annot
+
 def myfloor(x, p):
     v = 10**p
     return int(x * v)/v

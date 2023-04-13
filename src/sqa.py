@@ -184,10 +184,17 @@ class SpeechQualityAssigner:
         mos_score : float
             Detection score.
         """
-        
+
         waveform = waveform.to(self.device).unsqueeze(0)
         with torch.no_grad():
             nmr_embs = self.nmr_embs
+            
+            # we just use max_time if record has more than max_time
+            max_time = 60
+            max_frames = max_time*self.sr
+            if max_frames < waveform.shape[1]:
+                waveform = waveform[:, :max_frames]
+
             test_embs = self.sqa_model.extract_embeddings(waveform)
             test_embs = test_embs.repeat(nmr_embs.shape[0], 1, 1)
 

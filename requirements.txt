@@ -16,3 +16,4 @@ modelscope[audio] -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/rep
 torchmetrics
 pystoi
 torchmetrics[audio]
+malaya-speech

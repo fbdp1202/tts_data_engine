@@ -2,8 +2,9 @@ import os
 
 from pyannote.audio import Pipeline
 
+# from .utils import load_annot_from_rttm
 from .visualize import plot_annotations
-
+import malaya_speech
 
 class SpeakerDiarizer:
 
@@ -32,24 +33,32 @@ class SpeakerDiarizer:
         os.makedirs(fig_dir, exist_ok=True)
 
         annotations = []
-        result = self.model(wav_path)
+
+        rttm_path = os.path.join(rttm_dir, basename + '.rttm')
+        if os.path.exists(rttm_path):
+            result = malaya_speech.extra.rttm.load(rttm_path)
+        else:
+            result = self.model(wav_path)
+            if save_rttm:
+                with open(rttm_path, 'wt') as wf:
+                    result.write_rttm(wf)
         annotations.append(result)
-        if save_rttm:
-            rttm_path = os.path.join(rttm_dir, basename + '.rttm')
-            with open(rttm_path, 'wt') as wf:
-                result.write_rttm(wf)
 
         se_wav_path = os.path.splitext(wav_path)[0] + self.se_out_postfix + '.wav'
         if os.path.exists(se_wav_path):
-            se_result = self.model(se_wav_path)
+            se_rttm_path = os.path.join(rttm_dir, basename + self.se_out_postfix + '.rttm')
+            if os.path.exists(se_rttm_path):
+                se_result = malaya_speech.extra.rttm.load(se_rttm_path)
+            else:
+                se_result = self.model(se_wav_path)
+                if save_rttm:
+                    with open(se_rttm_path, 'wt') as wf:
+                        se_result.write_rttm(wf)
             annotations.append(se_result)
-            if save_rttm:
-                se_rttm_path = os.path.join(rttm_dir, basename + self.se_out_postfix + '.rttm')
-                with open(se_rttm_path, 'wt') as wf:
-                    se_result.write_rttm(wf)
 
         save_fig_path = os.path.join(fig_dir, basename + '.png')
-        plot_annotations(annotations, save_fig_path, wav_path=wav_path)
+        if not os.path.exists(save_fig_path):
+            plot_annotations(annotations, save_fig_path, wav_path=wav_path)
         return result
 
 if __name__ == '__main__':
