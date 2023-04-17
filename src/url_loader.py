@@ -214,12 +214,21 @@ class YoutubeLoader:
         f.close()
         return yt_dir
 
-    def dl_playlist(self, pl_url, overwrite=False):
+    def dl_playlist(self, pl_url, overwrite=False, max_n_pl_url=30):
 
         p = Playlist(pl_url)
         yt_dir_list = []
 
-        for url in tqdm.tqdm(sorted(p.video_urls)):
+        url_list = sorted(p.video_urls)
+        n_pl_url = len(url_list)
+        if n_pl_url == 0:
+            return []
+
+        if max_n_pl_url > 0:
+            n_pl_url = min(n_pl_url, max_n_pl_url)
+            url_list = url_list[:n_pl_url]
+
+        for url in tqdm.tqdm(url_list):
             yt_dir = self.dl_youtube(url, overwrite=overwrite)
             if yt_dir is not None:
                 yt_dir_list.append(yt_dir)

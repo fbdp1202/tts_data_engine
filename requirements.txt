@@ -17,3 +17,5 @@ torchmetrics
 pystoi
 torchmetrics[audio]
 malaya-speech
+einops
+timm

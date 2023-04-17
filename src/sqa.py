@@ -173,7 +173,7 @@ class SpeechQualityAssigner:
 
         return nmr_embs
 
-    def estimate_score(self, waveform):
+    def estimate_score(self, waveform, max_time=60):
         """
         Parameters
         ----------
@@ -190,7 +190,6 @@ class SpeechQualityAssigner:
             nmr_embs = self.nmr_embs
             
             # we just use max_time if record has more than max_time
-            max_time = 60
             max_frames = max_time*self.sr
             if max_frames < waveform.shape[1]:
                 waveform = waveform[:, :max_frames]

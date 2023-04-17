@@ -1,6 +1,7 @@
 import argparse
 import os
 import tqdm
+import json
 import pickle
 import pandas as pd
 import torch
@@ -15,10 +16,11 @@ from whisper.audio import SAMPLE_RATE
 from src.utils import set_seeds
 from src.url_loader import YoutubeLoader
 from src.enhance import SpeechEnhancer
-from src.collector import CleanSpeechDetector
 
 from src.diarize import SpeakerDiarizer
-from src.engine import DataEngine
+from src.asr import SpeechRecognizer
+from src.collector import CleanSpeechDetector
+
 from src.visualize import viewer
 
 def get_args():
@@ -26,8 +28,7 @@ def get_args():
 
     # fmt: off
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--model", default="small", choices=available_models(), help="name of the Whisper model to use")
-    parser.add_argument("--model_dir", type=str, default=None, help="path to save model files; uses ~/.cache/whisper by default")
+
     parser.add_argument("--exp_dir", type=str, default='exps', help="path to experiments directory")
 
     parser.add_argument('--num_threads', type=int, default=0, required = False, help='number of threads')
@@ -35,8 +36,6 @@ def get_args():
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu", help="device to use for PyTorch inference")
     parser.add_argument('--sr', type=int, default=SAMPLE_RATE, required = False, help='sampling rate')
 
-    parser.add_argument("--output_dir", "-o", type=str, default=".", help="directory to save the outputs")
-    parser.add_argument("--output_format", "-f", type=str, default="all", choices=["all", "srt", "srt-word", "vtt", "txt", "tsv", "ass", "ass-char", "pickle", "vad"], help="format of the output file; if not specified, all available formats will be produced")
 
     parser.add_argument("--verbose", type=str2bool, default=True, help="whether to print out the progress and debug messages")
 
@@ -45,6 +44,12 @@ def get_args():
 
     # youtube loader config
     parser.add_argument('--yt_dir', type=str, default='data/youtube', required=False, help='mp4 download directory')
+
+    # ASR config
+    parser.add_argument("--asr_model", default="small", choices=available_models(), help="name of the Whisper model to use")
+    parser.add_argument("--asr_model_dir", type=str, default=None, help="path to save model files; uses ~/.cache/whisper by default")
+    parser.add_argument("--asr_output_dir", "-o", type=str, default=".", help="directory to save the outputs")
+    parser.add_argument("--asr_output_format", "-f", type=str, default="all", choices=["all", "srt", "srt-word", "vtt", "txt", "tsv", "ass", "ass-char", "pickle", "vad"], help="format of the output file; if not specified, all available formats will be produced")
 
     # speech enhancement config
     parser.add_argument('--se_out_postfix', type=str, default='_SE_FRCRN', required=False, help='output postfix string')
@@ -65,6 +70,8 @@ def get_args():
     parser.add_argument('--sc_ontology_file_path', type=str, default='data/BEATs/ontology.json', required=False, help='path of audioset ontology')
     parser.add_argument('--sc_labels_indices_csv', type=str, default='data/BEATs/class_labels_indices.csv', required=False, help='csv file of containing audioset label indices')
     parser.add_argument("--beats_model_ckpt_path", type=str, default='models/sc_models/BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt', help="pretrained BEATs model path")
+    parser.add_argument("--sc_chunk_time", type=float, default=1.0, help="sc chunk time")
+    parser.add_argument("--sc_step_ratio", type=float, default=0.1, help="sc step ratio")
 
     # alignment params
     parser.add_argument("--align_model", default=None, help="Name of phoneme-level ASR model to do alignment")
@@ -91,6 +98,8 @@ def get_args():
 
     parser.add_argument("--diar_exp_dir", type=str, default='sd', help="path to diarization experiments directory")
     parser.add_argument('--diar_model_name', type=str, default='pyannote/speaker-diarization@2.1', required=False, help='pretrained speaker diarization model name')
+    # parser.add_argument('--diar_embedding', type=str, default=None, required=False, help='pretrained speaker diarization model name')
+    parser.add_argument('--diar_embedding', type=str, default='fbdp1202/mfa-conformer', required=False, help='pretrained speaker diarization model name')
 
     # whisper params
     parser.add_argument("--temperature", type=float, default=0, help="temperature to use for sampling")
@@ -123,14 +132,81 @@ def get_args():
     
     args['vad_tmp_dir'] = os.path.join(args['exp_dir'], args['vad_tmp_dir'])
     args['vad_save_lab_dir'] = os.path.join(args['exp_dir'], args['vad_save_lab_dir'])
-
     args['sqa_nmr_feat_path'] = os.path.join(args['exp_dir'], args['sqa_nmr_feat_path'])
-
     args['csd_csv_dir'] = os.path.join(args['exp_dir'], args['csd_csv_dir'])
-
     args['diar_exp_dir'] = os.path.join(args['exp_dir'], args['diar_exp_dir'])
 
     return args
+
+def write_results_json(wav_path, asr_results, df, args, topk=5):
+    results = {}
+    results["wav_path"] = wav_path
+
+    # default values except embedding
+    results["sd_cfg"] = {
+        "segment": "pyannote/segmentation@2022.07",
+        "segment_duration": 5.0,
+        "segment_step": 0.1,
+        "embedding": "fbdp1202/mfa-conformer", # you revised!
+        "embedding_exclude_overlap": True,
+    }
+    
+    results["sc_cfg"] = {
+        "model": "BEATs",
+        "ckpt_path": "models/sc_models/BEATs_iter3_plus.pt",
+        "chunk_time": args['sc_chunk_time'],
+        "step_ratio": args['sc_step_ratio'],
+    }
+
+    results["sqa_cfg"] = {
+        "obj_model": "TorchAudio-Squim",
+        "sbj_model": "NORESQA-MOS",
+        "max_nmr_wav_time": args['sqa_nmr_chunk_time'],
+        "nmr_step_size": args['sqa_nmr_step_size'],
+        "nmr_wav_npy": "/mnt/dataset/daps/clean_nmr_n100_{}ms.npy".format(int(args['sqa_nmr_chunk_time']*1000)),
+        "max_time": 60,
+    }
+
+    results["segments"] = []
+    assert(len(asr_results["segments"]) == len(df))
+
+    for id in range(len(df)):
+        df_dict = df.iloc[id].to_dict()
+        asr_dict = asr_results["segments"][id]
+        
+        seg_dict = {}
+        seg_dict["start"] = df_dict["start"]
+        seg_dict["end"] = df_dict["end"]
+        seg_dict["spk_id"] = asr_dict["speaker"]
+        seg_dict["text"] = asr_dict["text"]
+        seg_dict["audio_tag"] = []
+
+        key_names = ["code", "name", "pred"]
+        for k in range(topk):
+            audio_tag_dict = {}
+            for key in key_names:
+                audio_tag_dict[key] = df_dict["top{}_{}".format(k+1, key)]
+            seg_dict["audio_tag"].append(audio_tag_dict)
+        
+        seg_dict["sqa_tag"] = {
+            "pred_mos": df_dict['NORESQA_MOS']
+        }
+        for key in ['SQUIM_STOI','SQUIM_PESQ','SQUIM_SI-SDR']:
+            if key in df_dict.keys():
+                name = key.lower().replace('squim', 'pred')
+                seg_dict["sqa_tag"][name] = df_dict[key]
+
+        results["segments"].append(seg_dict)
+
+    # results json write 
+    result_dir = os.path.join(args['exp_dir'], 'results')
+    os.makedirs(result_dir, exist_ok=True)
+
+    basename = os.path.splitext(os.path.basename(wav_path))[0]
+    with open(os.path.join(result_dir, basename+".json"), 'w') as wf:
+        json.dump(results, wf, indent=4)
+    
+    return results
 
 def main():
 
@@ -142,9 +218,16 @@ def main():
     # The Dark Knight
     # url = 'https://www.youtube.com/playlist?list=PLrT4uvwaf6uw5ChxpBQnx0dA5fcmXvuB_'
     # url = 'https://www.youtube.com/watch?v=jane6C4rIwc'
-    # url = 'https://www.youtube.com/watch?v=Wb6Oc1_SdJw'
+
     # 냥이아빠
-    url = 'https://www.youtube.com/playlist?list=PL-28pfEORGTTyRFb-HLE-xlugbi8nDBb3'
+    # url = 'https://www.youtube.com/playlist?list=PL-28pfEORGTTyRFb-HLE-xlugbi8nDBb3'
+    url = 'https://www.youtube.com/watch?v=Wb6Oc1_SdJw'
+
+    # Short story audiobooks
+    # url = 'https://www.youtube.com/playlist?list=PLC2RC6xxDj2efWJjsD9ry4TSiH4pU4hHE'
+
+    # 예능: 르세라핌
+    # url = 'https://www.youtube.com/playlist?list=PLUnnlhhDy3eZqoEIN8q4fMfV9tlOMikob'
 
     downloader = YoutubeLoader(args)
 
@@ -172,24 +255,43 @@ def main():
             "Not Match Speech Enhancement Wav File Number ({} != {})".format(len(se_wav_list), len(wav_list))
         del enhancer
 
+    # run speaker diarization
+    diarizer = SpeakerDiarizer(args)
+
+    diar_annot_list = []
+    for wav_path, dir_name in tqdm.tqdm(zip(wav_list, dir_list)):
+        diar_results = diarizer(wav_path)
+        diar_annot_list.append(diar_results)
+    del diarizer
+
+    # run ASR
+    translator = SpeechRecognizer(args)
+    asr_result_list = []
+    for wav_path, dir_name, diar_annot in tqdm.tqdm(zip(wav_list, dir_list, diar_annot_list)):
+        asr_result = translator(wav_path, diar_annot)
+        asr_result_list.append(asr_result)
+    del translator
+
     # run Speech Quality Assessment with Sound Classification
     detector = CleanSpeechDetector(args)
 
     df_list = {}
-    for (wav_path, dir_name) in tqdm.tqdm(zip(wav_list, dir_list)):
+    for (wav_path, dir_name, asr_result) in tqdm.tqdm(zip(wav_list, dir_list, asr_result_list)):
         csv_path = os.path.join(args['csd_csv_dir'], os.path.basename(dir_name) + ".csv")
-        if os.path.exists(csv_path) and not overwrite:
+        # will be fixed...
+        if os.path.exists(csv_path) and not overwrite and False:
             df = pd.read_csv(csv_path)
         else:
-            df = detector(wav_path, use_se=use_se)
+            df = detector(wav_path, results=asr_result, use_se=use_se,
+                        sc_chunk_time=args['sc_chunk_time'], sc_step_ratio=args['sc_step_ratio'])
         df_list[dir_name] = df
     del detector
+    print("DONE SQA.")
+    
+    for (wav_path, dir_name, asr_result) in tqdm.tqdm(zip(wav_list, dir_list, asr_result_list)):
+        df = df_list[dir_name]
+        write_results_json(wav_path, asr_result, df, args)
 
-    # run speaker diarization
-    diarizer = SpeakerDiarizer(args)
-    for wav_path, dir_name in tqdm.tqdm(zip(wav_list, dir_list)):
-        _ = diarizer(wav_path)
-    del diarizer
 
 if __name__ == "__main__":
     main()

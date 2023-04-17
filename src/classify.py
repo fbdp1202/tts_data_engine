@@ -121,15 +121,16 @@ class SoundClassifier:
             pred_list.append(pred)
 
         preds = torch.stack(pred_list)
-        pred = preds.mean(0)
+        # pred = preds.mean(0)
+        pred, _ = preds.max(0)
 
         if return_all:
             return pred, preds
         else:
             return pred
 
-    def pred_topk_with_label(self, waveform, mask=None, topk=5):
-        pred = self.predict(waveform, mask=mask)
+    def pred_topk_with_label(self, waveform, mask=None, chunk_time=1.0, step_ratio=0.1, topk=5):
+        pred = self.predict(waveform, mask=mask, chunk_time=chunk_time, step_ratio=step_ratio)
         probs, indices = pred.topk(k=topk)
         
         codes = [self.label_dict[idx.item()] for idx in indices]

@@ -1,0 +1,2114 @@
+{
+    "wav_path": "data/youtube/Wb6Oc1_SdJw/wav/Wb6Oc1_SdJw.wav",
+    "sd_cfg": {
+        "segment": "pyannote/segmentation@2022.07",
+        "segment_duration": 5.0,
+        "segment_step": 0.1,
+        "embedding": "fbdp1202/mfa-conformer",
+        "embedding_exclude_overlap": true
+    },
+    "sc_cfg": {
+        "model": "BEATs",
+        "ckpt_path": "models/sc_models/BEATs_iter3_plus.pt",
+        "chunk_time": 1.0,
+        "step_ratio": 0.1
+    },
+    "sqa_cfg": {
+        "obj_model": "TorchAudio-Squim",
+        "sbj_model": "NORESQA-MOS",
+        "max_nmr_wav_time": 3.0,
+        "nmr_step_size": 75,
+        "nmr_wav_npy": "/mnt/dataset/daps/clean_nmr_n100_3000ms.npy",
+        "max_time": 60
+    },
+    "segments": [
+        {
+            "start": 12.046,
+            "end": 16.167,
+            "spk_id": "SPEAKER_00",
+            "text": " Quartz Power Group is an energy company based in the UK.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.83
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.316
+                },
+                {
+                    "code": "/m/0jbk",
+                    "name": "Animal",
+                    "pred": 0.194
+                },
+                {
+                    "code": "/m/0brhx",
+                    "name": "Speech synthesizer",
+                    "pred": 0.15
+                },
+                {
+                    "code": "/m/032s66",
+                    "name": "Gunshot, gunfire",
+                    "pred": 0.119
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.314
+            }
+        },
+        {
+            "start": 16.967,
+            "end": 21.609,
+            "spk_id": "SPEAKER_00",
+            "text": " Marcus, the managing director, wants to discuss the company's sales figures.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.771
+                },
+                {
+                    "code": "/m/0brhx",
+                    "name": "Speech synthesizer",
+                    "pred": 0.363
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.27
+                },
+                {
+                    "code": "/m/0h2mp",
+                    "name": "Fly, housefly",
+                    "pred": 0.114
+                },
+                {
+                    "code": "/m/03vt0",
+                    "name": "Insect",
+                    "pred": 0.103
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.433
+            }
+        },
+        {
+            "start": 22.649,
+            "end": 28.131,
+            "spk_id": "SPEAKER_00",
+            "text": " He is meeting Maya, the finance director, David, the sales and marketing director,",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.689
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.448
+                },
+                {
+                    "code": "/m/0brhx",
+                    "name": "Speech synthesizer",
+                    "pred": 0.165
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.136
+                },
+                {
+                    "code": "/m/026t6",
+                    "name": "Drum",
+                    "pred": 0.105
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.269
+            }
+        },
+        {
+            "start": 28.651,
+            "end": 31.292,
+            "spk_id": "SPEAKER_00",
+            "text": " and Anna, the customer services director.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.769
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.239
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.107
+                },
+                {
+                    "code": "/m/07s2xch",
+                    "name": "Groan",
+                    "pred": 0.08
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.075
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.114
+            }
+        },
+        {
+            "start": 33.294,
+            "end": 35.755,
+            "spk_id": "SPEAKER_01",
+            "text": " Now you all know why I've called this meeting.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.661
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.274
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.119
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.115
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.107
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.287
+            }
+        },
+        {
+            "start": 37.195,
+            "end": 41.637,
+            "spk_id": "SPEAKER_01",
+            "text": " Sales figures for our region are down and we need to address this as soon as we can.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.734
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.358
+                },
+                {
+                    "code": "/m/07qcx4z",
+                    "name": "Tearing",
+                    "pred": 0.258
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.221
+                },
+                {
+                    "code": "/m/05rj2",
+                    "name": "Shuffling cards",
+                    "pred": 0.188
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.506
+            }
+        },
+        {
+            "start": 41.977,
+            "end": 45.558,
+            "spk_id": "SPEAKER_01",
+            "text": " So I'd like to start by asking Maya to talk us through the figures.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.716
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.372
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.23
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.179
+                },
+                {
+                    "code": "/m/0fx80y",
+                    "name": "Plucked string instrument",
+                    "pred": 0.163
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.395
+            }
+        },
+        {
+            "start": 46.158,
+            "end": 46.679,
+            "spk_id": "SPEAKER_01",
+            "text": " Okay Maya?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.719
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.087
+                },
+                {
+                    "code": "/m/04brg2",
+                    "name": "Dishes, pots, and pans",
+                    "pred": 0.079
+                },
+                {
+                    "code": "/m/023pjk",
+                    "name": "Cutlery, silverware",
+                    "pred": 0.077
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.07
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.495
+            }
+        },
+        {
+            "start": 46.839,
+            "end": 47.059,
+            "spk_id": "SPEAKER_01",
+            "text": " Fine.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.68
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.134
+                },
+                {
+                    "code": "/m/02qldy",
+                    "name": "Narration, monologue",
+                    "pred": 0.092
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.09
+                },
+                {
+                    "code": "/m/05zppz",
+                    "name": "Male speech, man speaking",
+                    "pred": 0.041
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.113
+            }
+        },
+        {
+            "start": 47.659,
+            "end": 51.62,
+            "spk_id": "SPEAKER_01",
+            "text": " And then we can take a look at the products we're offering and compare them with the competition.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.744
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.316
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.185
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.144
+                },
+                {
+                    "code": "/m/0fx80y",
+                    "name": "Plucked string instrument",
+                    "pred": 0.128
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.065
+            }
+        },
+        {
+            "start": 51.64,
+            "end": 53.121,
+            "spk_id": "SPEAKER_01",
+            "text": " So Maya, over to you.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.557
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.259
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.095
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.068
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.067
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 2.617
+            }
+        },
+        {
+            "start": 53.421,
+            "end": 54.021,
+            "spk_id": "SPEAKER_01",
+            "text": " Thanks Marcus.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.683
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.388
+                },
+                {
+                    "code": "/m/07pn_8q",
+                    "name": "Chopping (food)",
+                    "pred": 0.074
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.062
+                },
+                {
+                    "code": "/m/07r5v4s",
+                    "name": "Drip",
+                    "pred": 0.058
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 2.267
+            }
+        },
+        {
+            "start": 54.461,
+            "end": 59.383,
+            "spk_id": "SPEAKER_03",
+            "text": " Well, I've prepared some handouts to show you how the figures are looking.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.753
+                },
+                {
+                    "code": "/m/07pn_8q",
+                    "name": "Chopping (food)",
+                    "pred": 0.384
+                },
+                {
+                    "code": "/m/07qcx4z",
+                    "name": "Tearing",
+                    "pred": 0.293
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.219
+                },
+                {
+                    "code": "/m/02rtxlg",
+                    "name": "Whispering",
+                    "pred": 0.217
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 2.116
+            }
+        },
+        {
+            "start": 60.845,
+            "end": 64.087,
+            "spk_id": "SPEAKER_03",
+            "text": " If we look at sales year to date...",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.758
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.239
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.15
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.144
+                },
+                {
+                    "code": "/m/0ytgt",
+                    "name": "Child speech, kid speaking",
+                    "pred": 0.128
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 2.065
+            }
+        },
+        {
+            "start": 65.969,
+            "end": 72.554,
+            "spk_id": "SPEAKER_03",
+            "text": " So, in order to meet budget this year, we will, in my opinion, have to start some cost-saving measures.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.737
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.256
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.135
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.131
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.092
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.985
+            }
+        },
+        {
+            "start": 73.034,
+            "end": 75.376,
+            "spk_id": "SPEAKER_03",
+            "text": " What do you mean by that? Redundancies?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.722
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.272
+                },
+                {
+                    "code": "/m/07plz5l",
+                    "name": "Sigh",
+                    "pred": 0.08
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.076
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.069
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.324
+            }
+        },
+        {
+            "start": 75.936,
+            "end": 77.017,
+            "spk_id": "SPEAKER_04",
+            "text": " That's one possibility.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.696
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.101
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.076
+                },
+                {
+                    "code": "/m/01h8n0",
+                    "name": "Conversation",
+                    "pred": 0.059
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.053
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 2.273
+            }
+        },
+        {
+            "start": 77.457,
+            "end": 80.359,
+            "spk_id": "SPEAKER_04",
+            "text": " I can't agree with you there. We need a strong workforce.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.7
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.258
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.106
+                },
+                {
+                    "code": "/m/07plz5l",
+                    "name": "Sigh",
+                    "pred": 0.105
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.097
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.348
+            }
+        },
+        {
+            "start": 81.381,
+            "end": 91.907,
+            "spk_id": "SPEAKER_01",
+            "text": " Okay, thanks, Maya. Look, cost cutting is something that we need to think about, but we also need to stop the downturn in sales and regain market share.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.746
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.377
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.311
+                },
+                {
+                    "code": "/m/0fx80y",
+                    "name": "Plucked string instrument",
+                    "pred": 0.255
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.246
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.168
+            }
+        },
+        {
+            "start": 92.247,
+            "end": 95.048,
+            "spk_id": "SPEAKER_01",
+            "text": " So can I bring you in here, David? Any comments?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.745
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.275
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.146
+                },
+                {
+                    "code": "/m/07qc9xj",
+                    "name": "Clicking",
+                    "pred": 0.136
+                },
+                {
+                    "code": "/m/0316dw",
+                    "name": "Typing",
+                    "pred": 0.134
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.257
+            }
+        },
+        {
+            "start": 95.688,
+            "end": 100.951,
+            "spk_id": "SPEAKER_02",
+            "text": " Well, it's hard to know what the problem is. Our products are competitive.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.667
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.294
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.127
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.095
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.089
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.091
+            }
+        },
+        {
+            "start": 101.491,
+            "end": 104.673,
+            "spk_id": "SPEAKER_01",
+            "text": " So they're not getting better offers from the competition?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.613
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.271
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.101
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.081
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.078
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.125
+            }
+        },
+        {
+            "start": 105.514,
+            "end": 106.375,
+            "spk_id": "SPEAKER_02",
+            "text": " swallow shirt is!",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.677
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.149
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.118
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.059
+                },
+                {
+                    "code": "/m/07pn_8q",
+                    "name": "Chopping (food)",
+                    "pred": 0.032
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.376
+            }
+        },
+        {
+            "start": 106.395,
+            "end": 108.276,
+            "spk_id": "SPEAKER_02",
+            "text": " Need you sound\u4f4f?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.731
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.217
+                },
+                {
+                    "code": "/m/07pdjhy",
+                    "name": "Rub",
+                    "pred": 0.092
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.089
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.071
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.994
+            }
+        },
+        {
+            "start": 108.296,
+            "end": 109.436,
+            "spk_id": "SPEAKER_02",
+            "text": " Yn am leukecod Rhaidog Pethau,",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.622
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.298
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.132
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.106
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.099
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.405
+            }
+        },
+        {
+            "start": 109.516,
+            "end": 110.997,
+            "spk_id": "SPEAKER_02",
+            "text": " am dweud dwi'n theft yw dyluniau oall.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.602
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.27
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.071
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.065
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.065
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.853
+            }
+        },
+        {
+            "start": 111.037,
+            "end": 111.878,
+            "spk_id": "SPEAKER_02",
+            "text": " Clif ar fyddig swydd europei!",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.703
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.144
+                },
+                {
+                    "code": "/m/024dl",
+                    "name": "Cash register",
+                    "pred": 0.107
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.089
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.044
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.542
+            }
+        },
+        {
+            "start": 111.938,
+            "end": 113.579,
+            "spk_id": "SPEAKER_02",
+            "text": " Go\u6295 d roughly frosesu your CEO,",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.691
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.165
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.16
+                },
+                {
+                    "code": "/m/07pdjhy",
+                    "name": "Rub",
+                    "pred": 0.085
+                },
+                {
+                    "code": "/m/07qcx4z",
+                    "name": "Tearing",
+                    "pred": 0.075
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 2.721
+            }
+        },
+        {
+            "start": 113.619,
+            "end": 117.521,
+            "spk_id": "SPEAKER_01",
+            "text": " proff erfunidMR\ufffd ages Technically for this demislation error!",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.749
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.381
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.13
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.091
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.09
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 2.105
+            }
+        },
+        {
+            "start": 117.541,
+            "end": 118.322,
+            "spk_id": "SPEAKER_01",
+            "text": " R Add Kazians are",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.67
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.254
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.095
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.059
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.051
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.487
+            }
+        },
+        {
+            "start": 127.509,
+            "end": 131.573,
+            "spk_id": "SPEAKER_04",
+            "text": " Well, it's true we are seeing a decrease in custom in our region.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.686
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.248
+                },
+                {
+                    "code": "/m/02rtxlg",
+                    "name": "Whispering",
+                    "pred": 0.164
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.113
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.099
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.181
+            }
+        },
+        {
+            "start": 132.113,
+            "end": 134.356,
+            "spk_id": "SPEAKER_04",
+            "text": " There's also been an increase in customers",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.697
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.189
+                },
+                {
+                    "code": "/m/02rtxlg",
+                    "name": "Whispering",
+                    "pred": 0.097
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.078
+                },
+                {
+                    "code": "/m/07plz5l",
+                    "name": "Sigh",
+                    "pred": 0.075
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.654
+            }
+        },
+        {
+            "start": 134.416,
+            "end": 136.958,
+            "spk_id": "SPEAKER_04",
+            "text": " cancelling new contracts within 14 days.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.738
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.219
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.113
+                },
+                {
+                    "code": "/m/07plz5l",
+                    "name": "Sigh",
+                    "pred": 0.088
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.062
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.02
+            }
+        },
+        {
+            "start": 136.978,
+            "end": 138.119,
+            "spk_id": "SPEAKER_04",
+            "text": " So what do I...",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.814
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.157
+                },
+                {
+                    "code": "/m/07plz5l",
+                    "name": "Sigh",
+                    "pred": 0.14
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.097
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.074
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 2.591
+            }
+        },
+        {
+            "start": 138.139,
+            "end": 139.381,
+            "spk_id": "SPEAKER_02",
+            "text": " But do you know why?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.575
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.253
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.103
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.058
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.056
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.834
+            }
+        },
+        {
+            "start": 139.941,
+            "end": 143.264,
+            "spk_id": "SPEAKER_02",
+            "text": " Do the customers say why they don't like our offers?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.682
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.307
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.126
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.117
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.111
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.282
+            }
+        },
+        {
+            "start": 144.005,
+            "end": 147.088,
+            "spk_id": "SPEAKER_02",
+            "text": " I personally feel that this is vital information.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.659
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.313
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.099
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.081
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.08
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.28
+            }
+        },
+        {
+            "start": 147.108,
+            "end": 148.209,
+            "spk_id": "SPEAKER_02",
+            "text": " I mean, if we can't...",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.82
+                },
+                {
+                    "code": "/m/01h8n0",
+                    "name": "Conversation",
+                    "pred": 0.211
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.152
+                },
+                {
+                    "code": "/m/07rgt08",
+                    "name": "Chuckle, chortle",
+                    "pred": 0.104
+                },
+                {
+                    "code": "/m/01j3sz",
+                    "name": "Laughter",
+                    "pred": 0.076
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.363
+            }
+        },
+        {
+            "start": 148.812,
+            "end": 153.814,
+            "spk_id": "SPEAKER_04",
+            "text": " If I can finish what I was saying, I'd like to suggest we review our customer account procedures",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.727
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.252
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.132
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.113
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.089
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.214
+            }
+        },
+        {
+            "start": 153.934,
+            "end": 156.695,
+            "spk_id": "SPEAKER_04",
+            "text": " from first contact to after sales care.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.77
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.211
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.163
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.123
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.084
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.814
+            }
+        },
+        {
+            "start": 156.715,
+            "end": 161.376,
+            "spk_id": "SPEAKER_04",
+            "text": " I mean, perhaps it would be a good idea to start with that and see if the sales figures improve.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.744
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.256
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.204
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.125
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.088
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.276
+            }
+        },
+        {
+            "start": 161.877,
+            "end": 164.738,
+            "spk_id": "SPEAKER_01",
+            "text": " Thanks Anna. What do you two think of that?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.683
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.301
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.121
+                },
+                {
+                    "code": "/m/0jbk",
+                    "name": "Animal",
+                    "pred": 0.109
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.105
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.894
+            }
+        },
+        {
+            "start": 165.158,
+            "end": 166.818,
+            "spk_id": "SPEAKER_03",
+            "text": " Can I make another suggestion?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.702
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.263
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.121
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.088
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.067
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.548
+            }
+        },
+        {
+            "start": 167.779,
+            "end": 172.1,
+            "spk_id": "SPEAKER_03",
+            "text": " I think we need to see the whole picture from the customer's point of view.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.721
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.268
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.148
+                },
+                {
+                    "code": "/m/02rtxlg",
+                    "name": "Whispering",
+                    "pred": 0.138
+                },
+                {
+                    "code": "/m/07plz5l",
+                    "name": "Sigh",
+                    "pred": 0.099
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.968
+            }
+        },
+        {
+            "start": 173.001,
+            "end": 174.261,
+            "spk_id": "SPEAKER_03",
+            "text": " A customer survey perhaps.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.672
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.211
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.066
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.063
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.06
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.846
+            }
+        },
+        {
+            "start": 175.042,
+            "end": 180.904,
+            "spk_id": "SPEAKER_04",
+            "text": " big project it would need a project team which means taking staff from other departments.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.651
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.259
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.11
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.108
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.074
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.646
+            }
+        },
+        {
+            "start": 181.444,
+            "end": 188.085,
+            "spk_id": "SPEAKER_03",
+            "text": " Actually I was thinking about hiring an external researcher, get a neutral view on our position",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.728
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.297
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.15
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.126
+                },
+                {
+                    "code": "/m/07qyrcz",
+                    "name": "Plop",
+                    "pred": 0.119
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.277
+            }
+        },
+        {
+            "start": 188.125,
+            "end": 190.826,
+            "spk_id": "SPEAKER_03",
+            "text": " in the market and customers' views on us.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.719
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.265
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.087
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.087
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.077
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.151
+            }
+        },
+        {
+            "start": 191.546,
+            "end": 194.207,
+            "spk_id": "SPEAKER_01",
+            "text": " I like that idea, I think it could be very useful information.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.776
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.306
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.171
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.165
+                },
+                {
+                    "code": "/m/0fx80y",
+                    "name": "Plucked string instrument",
+                    "pred": 0.149
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.952
+            }
+        },
+        {
+            "start": 194.587,
+            "end": 196.428,
+            "spk_id": "SPEAKER_04",
+            "text": " Which department pays for it though?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.635
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.267
+                },
+                {
+                    "code": "/m/07plz5l",
+                    "name": "Sigh",
+                    "pred": 0.072
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.067
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.058
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.106
+            }
+        },
+        {
+            "start": 197.008,
+            "end": 202.429,
+            "spk_id": "SPEAKER_01",
+            "text": " We can talk about that in a minute. Do you agree in principle though that we need to understand",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.714
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.409
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.249
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.236
+                },
+                {
+                    "code": "/m/0fx80y",
+                    "name": "Plucked string instrument",
+                    "pred": 0.21
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.405
+            }
+        },
+        {
+            "start": 202.469,
+            "end": 203.529,
+            "spk_id": "SPEAKER_01",
+            "text": " the cause of the problem?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.662
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.187
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.099
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.061
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.056
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.15
+            }
+        },
+        {
+            "start": 204.571,
+            "end": 205.794,
+            "spk_id": "SPEAKER_04",
+            "text": " Yes, I suppose so.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.671
+                },
+                {
+                    "code": "/m/07plz5l",
+                    "name": "Sigh",
+                    "pred": 0.163
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.159
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.079
+                },
+                {
+                    "code": "/m/02zsn",
+                    "name": "Female speech, woman speaking",
+                    "pred": 0.065
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.009
+            }
+        },
+        {
+            "start": 206.495,
+            "end": 206.775,
+            "spk_id": "SPEAKER_01",
+            "text": " Good.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.608
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.157
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.062
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.055
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.037
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.491
+            }
+        },
+        {
+            "start": 207.877,
+            "end": 212.084,
+            "spk_id": "SPEAKER_01",
+            "text": " David, could you look for a market research company we could work with on this?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.722
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.284
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.107
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.082
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.073
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 4.141
+            }
+        },
+        {
+            "start": 212.124,
+            "end": 212.365,
+            "spk_id": "SPEAKER_01",
+            "text": " Sure.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.605
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.146
+                },
+                {
+                    "code": "/m/0brhx",
+                    "name": "Speech synthesizer",
+                    "pred": 0.047
+                },
+                {
+                    "code": "/m/028v0c",
+                    "name": "Silence",
+                    "pred": 0.041
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.032
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.926
+            }
+        },
+        {
+            "start": 212.685,
+            "end": 212.946,
+            "spk_id": "SPEAKER_01",
+            "text": " Great.",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.761
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.143
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.043
+                },
+                {
+                    "code": "/m/07qcx4z",
+                    "name": "Tearing",
+                    "pred": 0.038
+                },
+                {
+                    "code": "/m/01lsmm",
+                    "name": "Scissors",
+                    "pred": 0.025
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 2.007
+            }
+        },
+        {
+            "start": 213.607,
+            "end": 214.568,
+            "spk_id": "SPEAKER_01",
+            "text": " Well, let's move on then, shall we?",
+            "audio_tag": [
+                {
+                    "code": "/m/09x0r",
+                    "name": "Speech",
+                    "pred": 0.643
+                },
+                {
+                    "code": "/m/04rlf",
+                    "name": "Music",
+                    "pred": 0.184
+                },
+                {
+                    "code": "/t/dd00125",
+                    "name": "Inside, small room",
+                    "pred": 0.075
+                },
+                {
+                    "code": "/m/04szw",
+                    "name": "Musical instrument",
+                    "pred": 0.056
+                },
+                {
+                    "code": "/m/0342h",
+                    "name": "Guitar",
+                    "pred": 0.045
+                }
+            ],
+            "sqa_tag": {
+                "pred_mos": 3.405
+            }
+        }
+    ]
+}

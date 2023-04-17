@@ -1,10 +1,15 @@
 import os
 
-from pyannote.audio import Pipeline
+# from pyannote.audio import Pipeline
+# from .custom_pyannote.pipeline import Pipeline
+from .custom_pyannote.pipeline import Pipeline
 
 # from .utils import load_annot_from_rttm
+# from .visualize import plot_annotations
 from .visualize import plot_annotations
 import malaya_speech
+
+from pyannote.core import Annotation, Segment
 
 class SpeakerDiarizer:
 
@@ -17,11 +22,11 @@ class SpeakerDiarizer:
 
         self.se_out_postfix: str = args['se_out_postfix']
 
-        model = Pipeline.from_pretrained(model_name, use_auth_token=hf_token)
+        model = Pipeline.from_pretrained(model_name, use_auth_token=hf_token, embedding=args['diar_embedding'])
 
         self.model = model.to('cuda:0')
         
-    def __call__(self, wav_path, save_rttm=True):
+    def __call__(self, wav_path, save_rttm=True, overwrite=False):
 
         print("\n>>Run Diarization: {}".format(wav_path))
 
@@ -35,8 +40,12 @@ class SpeakerDiarizer:
         annotations = []
 
         rttm_path = os.path.join(rttm_dir, basename + '.rttm')
-        if os.path.exists(rttm_path):
-            result = malaya_speech.extra.rttm.load(rttm_path)
+        if not overwrite and os.path.exists(rttm_path):
+            malaya_result = malaya_speech.extra.rttm.load(rttm_path)[basename]
+
+            result = Annotation()
+            for segment, _, label in malaya_result.itertracks():
+                result[Segment(segment.start, segment.end)] = label
         else:
             result = self.model(wav_path)
             if save_rttm:
@@ -44,17 +53,17 @@ class SpeakerDiarizer:
                     result.write_rttm(wf)
         annotations.append(result)
 
-        se_wav_path = os.path.splitext(wav_path)[0] + self.se_out_postfix + '.wav'
-        if os.path.exists(se_wav_path):
-            se_rttm_path = os.path.join(rttm_dir, basename + self.se_out_postfix + '.rttm')
-            if os.path.exists(se_rttm_path):
-                se_result = malaya_speech.extra.rttm.load(se_rttm_path)
-            else:
-                se_result = self.model(se_wav_path)
-                if save_rttm:
-                    with open(se_rttm_path, 'wt') as wf:
-                        se_result.write_rttm(wf)
-            annotations.append(se_result)
+        # se_wav_path = os.path.splitext(wav_path)[0] + self.se_out_postfix + '.wav'
+        # if os.path.exists(se_wav_path):
+        #     se_rttm_path = os.path.join(rttm_dir, basename + self.se_out_postfix + '.rttm')
+        #     if os.path.exists(se_rttm_path):
+        #         se_result = malaya_speech.extra.rttm.load(se_rttm_path)
+        #     else:
+        #         se_result = self.model(se_wav_path)
+        #         if save_rttm:
+        #             with open(se_rttm_path, 'wt') as wf:
+        #                 se_result.write_rttm(wf)
+        #     annotations.append(se_result)
 
         save_fig_path = os.path.join(fig_dir, basename + '.png')
         if not os.path.exists(save_fig_path):
@@ -71,7 +80,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument("--seed", type=int, default=777, help="seed number")
-    # parser.add_argument('--test_wav_path', type=str, default='data/youtube/jane6C4rIwc/wav/jane6C4rIwc_SE_FRCRN.wav', required=False, help='path of test wav file')
+    # parser.add_argument('--test_wav_path', type=str, default='data/youtube/jane6C4rIwc/wav/jane6C4rIwc.wav', required=False, help='path of test wav file')
     parser.add_argument('--test_wav_path', type=str, default='data/youtube/XNKF1kOnUL4/wav/XNKF1kOnUL4.wav', required=False, help='path of test wav file')
 
     parser.add_argument("--exp_dir", type=str, default='exps', help="path to experiments directory")

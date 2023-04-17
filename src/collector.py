@@ -4,6 +4,8 @@ import pandas as pd
 
 import torch
 
+from pyannote.core import Annotation, Segment
+
 from .utils import load_audio
 
 from .vad import SpeechDetector
@@ -40,7 +42,7 @@ class CleanSpeechDetector:
         
         return vad_audio_path
 
-    def run_segments(self, input_audio_path, out_vad, topk=5, use_round=True):
+    def run_segments(self, input_audio_path, out_vad, topk=5, sc_chunk_time=1.0, sc_step_ratio=0.1, use_round=True):
 
         waveform = load_audio(input_audio_path, sr=self.sr)
         waveform = torch.FloatTensor(waveform)
@@ -61,7 +63,7 @@ class CleanSpeechDetector:
 
             seg_waveform = waveform[start:end]
 
-            sc_results = self.sc_manager.pred_topk_with_label(seg_waveform, topk=topk)
+            sc_results = self.sc_manager.pred_topk_with_label(seg_waveform, chunk_time=sc_chunk_time, step_ratio=sc_step_ratio, topk=topk)
             mos_score = self.sqa_manager.estimate_score(seg_waveform)
 
             results["index"].append(idx)
@@ -80,20 +82,29 @@ class CleanSpeechDetector:
 
         return df
 
-    def __call__(self, audio_file_path, use_se=False, save_csv=True, overwrite=False):
+    def __call__(self, audio_file_path, results=None, use_se=False, save_csv=True, overwrite=False,
+                topk=5, sc_chunk_time=1.0, sc_step_ratio=0.1):
         
-        vad_audio_path = self.set_vad_wav_name(audio_file_path, use_se=use_se)
+        if results is None:
+            vad_audio_path = self.set_vad_wav_name(audio_file_path, use_se=use_se)
 
-        binarized_segments = self.vad_manager(vad_audio_path)
+            binarized_segments = self.vad_manager(vad_audio_path)
+        else:
+            binarized_segments = Annotation()
+            segments = results["segments"]
+            for seg_dict in segments:
+                start = seg_dict['start']
+                end = seg_dict['end']
+                spk_id = seg_dict['speaker']
+                binarized_segments[Segment(start, end)] = spk_id
 
-        df = self.run_segments(audio_file_path, binarized_segments)
+        df = self.run_segments(audio_file_path, binarized_segments, topk=topk, sc_chunk_time=sc_chunk_time, sc_step_ratio=sc_step_ratio)
 
         if save_csv:
             save_csv_name = os.path.splitext(os.path.basename(audio_file_path))[0]+'.csv'
             save_csv_path = os.path.join(self.csd_csv_dir, save_csv_name)
 
             df.to_csv(save_csv_path)
-
 
         return df
 
