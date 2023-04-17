@@ -30,8 +30,6 @@ Please Just you refer if you set up your own environments.
 - `models/sqa_models/wav2vec_small.pt` &rarr;
     > visit "https://github.com/facebookresearch/fairseq/blob/main/examples/wav2vec/README.md", download "Wav2Vec 2.0 Base No finetuning"
 
-```
-
 ---
 
 ## Pipelines
