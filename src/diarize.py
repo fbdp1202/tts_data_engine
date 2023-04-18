@@ -7,7 +7,6 @@ from .custom_pyannote.pipeline import Pipeline
 # from .utils import load_annot_from_rttm
 # from .visualize import plot_annotations
 from .visualize import plot_annotations
-import malaya_speech
 
 from pyannote.core import Annotation, Segment
 
@@ -41,11 +40,7 @@ class SpeakerDiarizer:
 
         rttm_path = os.path.join(rttm_dir, basename + '.rttm')
         if not overwrite and os.path.exists(rttm_path):
-            malaya_result = malaya_speech.extra.rttm.load(rttm_path)[basename]
-
-            result = Annotation()
-            for segment, _, label in malaya_result.itertracks():
-                result[Segment(segment.start, segment.end)] = label
+            result = Annotation(uri=rttm_path)
         else:
             result = self.model(wav_path)
             if save_rttm:

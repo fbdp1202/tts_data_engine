@@ -16,6 +16,5 @@ modelscope[audio] -f https://modelscope.oss-cn-beijing.aliyuncs.com/releases/rep
 torchmetrics
 torchmetrics[audio]
 pystoi
-malaya-speech
 einops
 timm
