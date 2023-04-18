@@ -5,6 +5,7 @@ import json
 import pickle
 import pandas as pd
 import torch
+
 from whisper.tokenizer import LANGUAGES, TO_LANGUAGE_CODE
 from whisper.utils import (
     optional_float,
@@ -98,7 +99,7 @@ def get_args():
 
     parser.add_argument("--diar_exp_dir", type=str, default='sd', help="path to diarization experiments directory")
     parser.add_argument('--diar_model_name', type=str, default='pyannote/speaker-diarization@2.1', required=False, help='pretrained speaker diarization model name')
-    # parser.add_argument('--diar_embedding', type=str, default=None, required=False, help='pretrained speaker diarization model name')
+    # parser.add_argument('--diar_embedding', type=str, default='speechbrain/spkrec-ecapa-voxceleb', required=False, help='pretrained speaker diarization model name')
     parser.add_argument('--diar_embedding', type=str, default='fbdp1202/mfa-conformer', required=False, help='pretrained speaker diarization model name')
 
     # whisper params
@@ -147,7 +148,7 @@ def write_results_json(wav_path, asr_results, df, args, topk=5):
         "segment": "pyannote/segmentation@2022.07",
         "segment_duration": 5.0,
         "segment_step": 0.1,
-        "embedding": "fbdp1202/mfa-conformer", # you revised!
+        "embedding": args['diar_embedding'],
         "embedding_exclude_overlap": True,
     }
     
