@@ -131,7 +131,7 @@ visit https://hf.co/{model_id} to accept the user conditions."""
         params = config["pipeline"].get("params", {})
         params.setdefault("use_auth_token", use_auth_token)
         if "embedding" in kwargs.keys():
-            if kwargs["embedding"] is not None:
+            if kwargs["embedding"] is not None and not params["embedding"] == kwargs["embedding"]:
                 params["embedding"] = kwargs["embedding"]
                 print(">>Embedding Type: {}".format(kwargs["embedding"]))
 
