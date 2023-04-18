@@ -9,7 +9,7 @@ import torch
 from whisper import load_model
 from whisper.audio import SAMPLE_RATE
 
-from whisperx.alignment import load_align_model, align
+from whisperx.alignment import load_align_model, align, check_align_model
 from whisperx.asr import transcribe, transcribe_with_vad
 from whisperx.diarize import DiarizationPipeline, assign_word_speakers
 from whisperx.utils import get_writer
@@ -30,6 +30,33 @@ from whisper.utils import (
     make_safe,
 )
 
+def assign_segment_speakers(diarize_df, result_segments, fill_nearest=False):
+    for seg in result_segments:
+        speakers = []
+        # for wdx, wrow in wdf.iterrows():
+        if not np.isnan(seg['start']):
+            diarize_df['intersection'] = np.minimum(diarize_df['end'], seg['end']) - np.maximum(diarize_df['start'], seg['start'])
+            diarize_df['union'] = np.maximum(diarize_df['end'], seg['end']) - np.minimum(diarize_df['start'], seg['start'])
+            # remove no hit
+            if not fill_nearest:
+                dia_tmp = diarize_df[diarize_df['intersection'] > 0]
+            else:
+                dia_tmp = diarize_df
+            if len(dia_tmp) == 0:
+                speaker = None
+            else:
+                speaker = dia_tmp.sort_values("intersection", ascending=False).iloc[0][2]
+        else:
+            speaker = None
+        speakers.append(speaker)
+
+        speaker_count = pd.Series(speakers).value_counts()
+        if len(speaker_count) == 0:
+            seg["speaker"]= "UNKNOWN"
+        else:
+            seg["speaker"] = speaker_count.index[0]
+
+    return result_segments
 
 class SpeechRecognizer:
     
@@ -183,20 +210,26 @@ class SpeechRecognizer:
 
         # >> Align
         if self.align_model is not None and len(result["segments"]) > 0:
-            if result.get("language", "en") != self.align_metadata["language"]:
-                # load new language
-                print(f"New language found ({result['language']})! Previous was ({self.align_metadata['language']}), loading new alignment model for new language...")
-                self.align_model, self.align_metadata = load_align_model(result["language"], self.device)
-            print(">>Performing alignment...")
-            result = align(result["segments"], self.align_model, self.align_metadata, wav_path, self.device,
-                extend_duration=self.align_extend, start_from_previous=self.align_from_prev, interpolate_method=self.interpolate_method)
+            if check_align_model(result["language"]):
+                if result.get("language", "en") != self.align_metadata["language"]:
+                    # load new language
+                    print(f"New language found ({result['language']})! Previous was ({self.align_metadata['language']}), loading new alignment model for new language...")
+                    self.align_model, self.align_metadata = load_align_model(result["language"], self.device)
+                print(">>Performing alignment...")
+                result = align(result["segments"], self.align_model, self.align_metadata, wav_path, self.device,
+                    extend_duration=self.align_extend, start_from_previous=self.align_from_prev, interpolate_method=self.interpolate_method)
 
         # >> Diarize
         diarize_df = pd.DataFrame(diarize_segments.itertracks(yield_label=True))
         diarize_df['start'] = diarize_df[0].apply(lambda x: x.start)
         diarize_df['end'] = diarize_df[0].apply(lambda x: x.end)
 
-        results_segments, word_segments = assign_word_speakers(diarize_df, result["segments"])
+        if not 'word-segments' in result["segments"]:
+            word_segments = None
+            results_segments = assign_segment_speakers(diarize_df, result["segments"])
+        else:
+            results_segments, word_segments = assign_word_speakers(diarize_df, result["segments"])
+
         result = {"segments": results_segments, "word_segments": word_segments}
 
         return result

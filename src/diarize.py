@@ -1,14 +1,11 @@
 import os
 
-# from pyannote.audio import Pipeline
-# from .custom_pyannote.pipeline import Pipeline
+from pyannote.core import Annotation, Segment
+import malaya_speech
+
+from .visualize import plot_annotations
 from .custom_pyannote.pipeline import Pipeline
 
-# from .utils import load_annot_from_rttm
-# from .visualize import plot_annotations
-from .visualize import plot_annotations
-
-from pyannote.core import Annotation, Segment
 
 class SpeakerDiarizer:
 
@@ -27,8 +24,6 @@ class SpeakerDiarizer:
         
     def __call__(self, wav_path, save_rttm=True, overwrite=False):
 
-        print("\n>>Run Diarization: {}".format(wav_path))
-
         basename = os.path.splitext(os.path.basename(wav_path))[0]
         exp_dir = os.path.join(self.exp_dir, basename)
         rttm_dir = os.path.join(exp_dir, 'rttm')
@@ -40,8 +35,16 @@ class SpeakerDiarizer:
 
         rttm_path = os.path.join(rttm_dir, basename + '.rttm')
         if not overwrite and os.path.exists(rttm_path):
-            result = Annotation(uri=rttm_path)
+            print("\n>>SKIP Diarization: {}".format(wav_path))
+
+            malaya_result = malaya_speech.extra.rttm.load(rttm_path)[basename]
+
+            result = Annotation()
+            for segment, _, label in malaya_result.itertracks():
+                result[Segment(segment.start, segment.end)] = label
+
         else:
+            print("\n>>Run Diarization: {}".format(wav_path))
             result = self.model(wav_path)
             if save_rttm:
                 with open(rttm_path, 'wt') as wf:
@@ -61,7 +64,7 @@ class SpeakerDiarizer:
         #     annotations.append(se_result)
 
         save_fig_path = os.path.join(fig_dir, basename + '.png')
-        if not os.path.exists(save_fig_path):
+        if not os.path.exists(save_fig_path) and False:
             plot_annotations(annotations, save_fig_path, wav_path=wav_path)
         return result
 

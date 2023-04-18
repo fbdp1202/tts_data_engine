@@ -1,11 +1,11 @@
 import argparse
 import os
 import tqdm
+import glob
 import json
 import pickle
 import pandas as pd
 import torch
-
 from whisper.tokenizer import LANGUAGES, TO_LANGUAGE_CODE
 from whisper.utils import (
     optional_float,
@@ -15,16 +15,12 @@ from whisper.utils import (
 from whisper.audio import SAMPLE_RATE
 
 from src.utils import set_seeds
-from src.url_loader import YoutubeLoader
+
 from src.enhance import SpeechEnhancer
 
 from src.diarize import SpeakerDiarizer
-from src.asr import SpeechRecognizer
-from src.collector import CleanSpeechDetector
 
 from src.visualize import viewer
-
-from src.subtitle_writer import WriteASS
 
 def get_args():
     from whisper import available_models
@@ -46,7 +42,6 @@ def get_args():
     parser.add_argument("--language", type=str, default=None, choices=sorted(LANGUAGES.keys()) + sorted([k.title() for k in TO_LANGUAGE_CODE.keys()]), help="language spoken in the audio, specify None to perform language detection")
 
     # youtube loader config
-    parser.add_argument('--url', type=str, default='https://www.youtube.com/watch?v=M7h4bbv7XeE', required=False, help='youtube url')
     parser.add_argument('--yt_dir', type=str, default='data/youtube', required=False, help='mp4 download directory')
 
     # ASR config
@@ -100,10 +95,10 @@ def get_args():
     parser.add_argument("--min_speakers", default=None, type=int)
     parser.add_argument("--max_speakers", default=None, type=int)
 
-    parser.add_argument("--diar_exp_dir", type=str, default='sd', help="path to diarization experiments directory")
+    parser.add_argument("--diar_exp_dir", type=str, default='sd/voxconverse/test', help="path to diarization experiments directory")
     parser.add_argument('--diar_model_name', type=str, default='pyannote/speaker-diarization@2.1', required=False, help='pretrained speaker diarization model name')
-    parser.add_argument('--diar_embedding', type=str, default='speechbrain/spkrec-ecapa-voxceleb', required=False, help='pretrained speaker diarization model name')
     # parser.add_argument('--diar_embedding', type=str, default='fbdp1202/mfa-conformer', required=False, help='pretrained speaker diarization model name')
+    parser.add_argument('--diar_embedding', type=str, default='speechbrain/spkrec-ecapa-voxceleb', required=False, help='pretrained speaker diarization model name')
 
     # whisper params
     parser.add_argument("--temperature", type=float, default=0, help="temperature to use for sampling")
@@ -132,90 +127,16 @@ def get_args():
     parser.add_argument("--overwrite", action='store_true', help="Extracting features independently of their existence")
     # fmt: on
 
-    # subtitle ass
-    parser.add_argument("--ass_dir", type=str, default='ass', help="path to experiments directory")
-
-
     args = parser.parse_args().__dict__
     
     args['vad_tmp_dir'] = os.path.join(args['exp_dir'], args['vad_tmp_dir'])
     args['vad_save_lab_dir'] = os.path.join(args['exp_dir'], args['vad_save_lab_dir'])
     args['sqa_nmr_feat_path'] = os.path.join(args['exp_dir'], args['sqa_nmr_feat_path'])
     args['csd_csv_dir'] = os.path.join(args['exp_dir'], args['csd_csv_dir'])
-    args['diar_exp_dir'] = os.path.join(args['exp_dir'], args['diar_exp_dir'])
-    args['ass_dir'] = os.path.join(args['exp_dir'], args['ass_dir'])
+
+    args['diar_exp_dir'] = os.path.join(args['exp_dir'], args['diar_exp_dir'], args['diar_embedding'].replace('/', '_'))
 
     return args
-
-def write_results_json(wav_path, asr_results, df, args, topk=5):
-    results = {}
-    results["wav_path"] = wav_path
-
-    # default values except embedding
-    results["sd_cfg"] = {
-        "segment": "pyannote/segmentation@2022.07",
-        "segment_duration": 5.0,
-        "segment_step": 0.1,
-        "embedding": args['diar_embedding'],
-        "embedding_exclude_overlap": True,
-    }
-    
-    results["sc_cfg"] = {
-        "model": "BEATs",
-        "ckpt_path": "models/sc_models/BEATs_iter3_plus.pt",
-        "chunk_time": args['sc_chunk_time'],
-        "step_ratio": args['sc_step_ratio'],
-    }
-
-    results["sqa_cfg"] = {
-        "obj_model": "TorchAudio-Squim",
-        "sbj_model": "NORESQA-MOS",
-        "max_nmr_wav_time": args['sqa_nmr_chunk_time'],
-        "nmr_step_size": args['sqa_nmr_step_size'],
-        "nmr_wav_npy": "/mnt/dataset/daps/clean_nmr_n100_{}ms.npy".format(int(args['sqa_nmr_chunk_time']*1000)),
-        "max_time": 60,
-    }
-
-    results["segments"] = []
-    assert(len(asr_results["segments"]) == len(df))
-
-    for id in range(len(df)):
-        df_dict = df.iloc[id].to_dict()
-        asr_dict = asr_results["segments"][id]
-        
-        seg_dict = {}
-        seg_dict["start"] = df_dict["start"]
-        seg_dict["end"] = df_dict["end"]
-        seg_dict["spk_id"] = asr_dict["speaker"]
-        seg_dict["text"] = asr_dict["text"]
-        seg_dict["audio_tag"] = []
-
-        key_names = ["code", "name", "pred"]
-        for k in range(topk):
-            audio_tag_dict = {}
-            for key in key_names:
-                audio_tag_dict[key] = df_dict["top{}_{}".format(k+1, key)]
-            seg_dict["audio_tag"].append(audio_tag_dict)
-        
-        seg_dict["sqa_tag"] = {
-            "pred_mos": df_dict['NORESQA_MOS']
-        }
-        for key in ['SQUIM_STOI','SQUIM_PESQ','SQUIM_SI-SDR']:
-            if key in df_dict.keys():
-                name = key.lower().replace('squim', 'pred')
-                seg_dict["sqa_tag"][name] = df_dict[key]
-
-        results["segments"].append(seg_dict)
-
-    # results json write 
-    result_dir = os.path.join(args['exp_dir'], 'results')
-    os.makedirs(result_dir, exist_ok=True)
-
-    basename = os.path.splitext(os.path.basename(wav_path))[0]
-    with open(os.path.join(result_dir, basename+".json"), 'w') as wf:
-        json.dump(results, wf, indent=4)
-    
-    return results
 
 def main():
 
@@ -223,41 +144,8 @@ def main():
     set_seeds(args['seed'])
 
     overwrite: bool = args.pop("overwrite")
-
-    # The Dark Knight
-    # url = 'https://www.youtube.com/playlist?list=PLrT4uvwaf6uw5ChxpBQnx0dA5fcmXvuB_'
-    # url = 'https://www.youtube.com/watch?v=jane6C4rIwc'
-
-    # 냥이아빠
-    # url = 'https://www.youtube.com/playlist?list=PL-28pfEORGTTyRFb-HLE-xlugbi8nDBb3'
-    # url = 'https://www.youtube.com/watch?v=Wb6Oc1_SdJw'
-
-    # Short story audiobooks
-    # url = 'https://www.youtube.com/playlist?list=PLC2RC6xxDj2efWJjsD9ry4TSiH4pU4hHE'
-
-    # 예능: 르세라핌
-    # url = 'https://www.youtube.com/playlist?list=PLUnnlhhDy3eZqoEIN8q4fMfV9tlOMikob'
-
-    # 대화체 설명
-    # url = 'https://www.youtube.com/watch?v=M7h4bbv7XeE'
-
-    url = args['url']
-
-    downloader = YoutubeLoader(args)
-
-    # download youtube clip
-    dir_list = sorted(downloader(url))
-    del downloader
-
-    # generate wav list
-    wav_list = []
-    for dir_name in dir_list:
-        basename = os.path.basename(dir_name)
-        
-        wav_path = os.path.join(dir_name, 'wav', basename+".wav")
-        assert(os.path.exists(wav_path)), "No Exists Wav File: {}".format(wav_path)
-
-        wav_list.append(wav_path)
+    
+    wav_list = sorted(glob.glob('/mnt/labelmaker/labelmaker/data/sd/voxconverse_0_3/wav/test' + "/*.wav"))
 
     # run speech enhancement
     # use_se: bool = args['use_se']
@@ -277,40 +165,6 @@ def main():
         diar_results = diarizer(wav_path)
         diar_annot_list.append(diar_results)
     del diarizer
-
-    # run ASR
-    translator = SpeechRecognizer(args)
-    asr_result_list = []
-    for wav_path, diar_annot in tqdm.tqdm(zip(wav_list, diar_annot_list)):
-        asr_result = translator(wav_path, diar_annot)
-        asr_result_list.append(asr_result)
-    del translator
-
-    # run Speech Quality Assessment with Sound Classification
-    detector = CleanSpeechDetector(args)
-
-    df_list = {}
-    for (wav_path, dir_name, asr_result) in tqdm.tqdm(zip(wav_list, dir_list, asr_result_list)):
-        csv_path = os.path.join(args['csd_csv_dir'], os.path.basename(dir_name) + ".csv")
-        # will be fixed...
-        if os.path.exists(csv_path) and not overwrite and False:
-            df = pd.read_csv(csv_path)
-        else:
-            df = detector(wav_path, results=asr_result, use_se=use_se,
-                        sc_chunk_time=args['sc_chunk_time'], sc_step_ratio=args['sc_step_ratio'])
-        df_list[dir_name] = df
-    del detector
-    print("DONE SQA.")
-    
-    for (wav_path, dir_name, asr_result) in tqdm.tqdm(zip(wav_list, dir_list, asr_result_list)):
-        df = df_list[dir_name]
-        result = write_results_json(wav_path, asr_result, df, args)
-
-        ass_dir = os.path.join(args['ass_dir'], os.path.basename(dir_name))
-        os.makedirs(ass_dir, exist_ok=True)
-
-        writer = WriteASS(ass_dir)
-        writer(result, wav_path)
 
 
 if __name__ == "__main__":
