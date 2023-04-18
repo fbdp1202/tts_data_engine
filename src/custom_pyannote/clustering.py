@@ -489,17 +489,15 @@ class AgglomerativeClustering(BaseClustering):
                 embeddings, method=self.method, metric=self.metric
             )
 
-        # import pdb
-        # pdb.set_trace()
-        import matplotlib
-        import matplotlib.pyplot as plt
-        matplotlib.use('Agg')
-        from sklearn.metrics.pairwise import cosine_similarity
-        print(embeddings.shape)
-        scr_mx = cosine_similarity(embeddings)
-        plt.imshow(scr_mx, cmap='jet', interpolation='none')
-        plt.savefig('mfa-conformer.png')
-        plt.close('all')
+        # import matplotlib
+        # import matplotlib.pyplot as plt
+        # matplotlib.use('Agg')
+        # from sklearn.metrics.pairwise import cosine_similarity
+        # print(embeddings.shape)
+        # scr_mx = cosine_similarity(embeddings)
+        # plt.imshow(scr_mx, cmap='jet', interpolation='none')
+        # plt.savefig('mfa-conformer.png')
+        # plt.close('all')
         
         # apply the predefined threshold
         clusters = fcluster(dendrogram, self.threshold, criterion="distance") - 1
